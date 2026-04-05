@@ -16,7 +16,6 @@
   .include "macros.inc"
 
   .section .data
-  .balign 256
 ;
 RAM_START:
 FLAGS:    .space    1               ; Miscellaneous flags
@@ -35,5 +34,6 @@ R1:       .space    3               ;
 ;
 conversion_store:	ds 		4		; Scratch pad to convert integer representations
 ;
+  .balign 256
   .include "bbc-ez80/DATA.Z80"
 RAM_END:
