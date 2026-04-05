@@ -17,8 +17,12 @@
     .extern START          ; In main.s
     .extern RAM_START      ; In ram.asm
     .extern RAM_SIZE       ; From linker.conf
+    .extern MOS_SYSVARS
+
     .assume ADL = 1
     .include "equs.inc"
+    .include "mos.inc"
+    .include "macros.inc"
 
 argv_ptrs_max:    .equ 16         ; Maximum number of arguments allowed in argv
 
@@ -51,6 +55,7 @@ _start:
 
     ld      b, 0                 ; C = argc
     call    _clear_ram
+    call    get_sysvars
 
     jp      START                ; Enter user code
 
@@ -63,6 +68,24 @@ _end:
     pop     de
     pop     bc
     pop     af
+
+    ret
+; Get pointer to sysvars
+get_sysvars:
+    push    bc
+    push    de
+    push    hl
+    push    ix
+    push    iy
+
+    MOSCALL mos_sysvars
+    ld      (MOS_SYSVARS),IX
+
+    pop     iy
+    pop     ix
+    pop     hl
+    pop     de
+    pop     bc
 
     ret
 

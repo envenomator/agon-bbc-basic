@@ -70,6 +70,6 @@ STRVAL_SIZE	EQU	5
 ;
 .macro  moscall function
   LD	A, \function
-  RST.LIS	08h
+  RST.LIL	08h
 .endm
 

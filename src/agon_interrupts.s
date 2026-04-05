@@ -19,11 +19,15 @@
 			.global	VBLANK_STOP
 			.global	VBLANK_HANDLER	
 
+      .extern MOS_SYSVARS
 			.extern	ESCSET	
 			.extern	KEYDOWN		 ; In ram.asm
 			.extern	KEYASCII 	 ; In ram.asm
 			.extern	KEYCOUNT	 ; In ram.asm
 
+      ;DEBUG
+      .global DO_KEYBOARD
+      ;DEBUG
 ; Hook into the MOS VBLANK interrupt
 ;
 VBLANK_INIT:		DI
@@ -49,7 +53,8 @@ VBLANK_STOP:		DI
 
 ; A safe LIS call to ESCSET
 ; 
-DO_KEYBOARD:		MOSCALL		mos_sysvars			 ; Get the system variables
+DO_KEYBOARD:
+      LD    IX, (MOS_SYSVARS)
 			LD		HL, KEYCOUNT 			 ; Check whether the keycount has changed
 			LD		A, (IX + sysvar_vkeycount)	 ; by comparing the MOS copy
 			CP 		(HL)				 ; with our local copy
@@ -72,15 +77,56 @@ DO_KEYBOARD_1:		LD		(HL), A 			 ; Store the updated local copy of keycount
 			CALL		Z, ESCSET			 ; Yes, so set the escape flags
 			RET						 ; Return to the interrupt handler
 
-VBLANK_HANDLER:		DI 
-			PUSH		AF 
-			PUSH		HL
-			PUSH		IX
-			CALL		DO_KEYBOARD
-			POP		IX 
-			POP		HL
-			POP		AF 
+;VBLANK_HANDLER:		DI 
+;			PUSH		AF 
+;			PUSH		HL
+;			PUSH		IX
+;			CALL		DO_KEYBOARD
+;			POP		IX 
+;			POP		HL
+;			POP		AF 
+
 ;
 ; Finally jump to the MOS interrupt
 ;
-VBLANK_HANDLER_JP:	JP		0				 ; This is self-modified by VBLANK_INIT				
+;VBLANK_HANDLER_JP:	JP		0				 ; This is self-modified by VBLANK_INIT				
+
+VBLANK_HANDLER:
+            DI
+
+            PUSH    AF
+            PUSH    BC
+            PUSH    DE
+            PUSH    HL
+            PUSH    IX
+            PUSH    IY
+
+            EX      AF,AF'
+            EXX
+            PUSH    AF
+            PUSH    BC
+            PUSH    DE
+            PUSH    HL
+            EXX
+            EX      AF,AF'
+
+            CALL    DO_KEYBOARD
+
+            EX      AF,AF'
+            EXX
+            POP     HL
+            POP     DE
+            POP     BC
+            POP     AF
+            EXX
+            EX      AF,AF'
+
+            POP     IY
+            POP     IX
+            POP     HL
+            POP     DE
+            POP     BC
+            POP     AF
+
+VBLANK_HANDLER_JP:
+            JP      0
