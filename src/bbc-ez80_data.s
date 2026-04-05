@@ -21,7 +21,7 @@ RAM_START:
 FLAGS:    .space    1               ; Miscellaneous flags
                                     ; - BIT 7: Set if ESC pressed
                                     ; - BIT 6: Set to disable ESC
-OSWRCHPT: .space    2               ; Pointer for *EDIT
+OSWRCHPT: .space    3               ; Pointer for *EDIT
 OSWRCHCH: .space    1               ; Channel of OSWRCH
                                     ; - 0: Console
                                     ; - 1: File
