@@ -1,0 +1,13 @@
+# binary files
+*.bin
+*.out
+
+# object files
+*.obj
+
+# linker output
+*.map
+
+# build directories
+bin/
+obj/
