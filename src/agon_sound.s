@@ -79,7 +79,7 @@ SOUND:			CALL	EXPR_W2			 ; DE: Channel/Control, HL: Volume
 			LD	(VDU_BUFFER+5), BC
 ;
 			PUSH	IX			 ; Get the system vars in IX
-			MOSCALL	mos_sysvars		 ; Reset the semaphore
+      LD  IX, (MOS_SYSVARS)
 SOUND0:			RES.LIL	3, (IX+sysvar_vdp_pflags)
 ;
 			VDU	23			 ; Send the sound command

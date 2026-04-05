@@ -53,18 +53,20 @@ CLRSCN:			LD	A, 0x0C
 				
 ; MODE n: Set video mode
 ;
-MODE:			PUSH	IX			 ; Get the system vars in IX
-			MOSCALL	mos_sysvars		 ; Reset the semaphore
-			RES	4, (IX+sysvar_vdp_pflags)
-			CALL    EXPRI
-			EXX
-			VDU	0x16			 ; Mode change
-			VDU	L
-			MOSCALL	mos_sysvars		
-1:			BIT	4, (IX+sysvar_vdp_pflags)
-			JR	Z, 1b			 ; Wait for the result			
-			POP	IX
-			JP	XEQ
+MODE:
+    PUSH	IX			 ; Get the system vars in IX
+    LD  IX, (MOS_SYSVARS)
+    RES	4, (IX+sysvar_vdp_pflags)
+    CALL    EXPRI
+    EXX
+    VDU	0x16			 ; Mode change
+    VDU	L
+    LD  IX, (MOS_SYSVARS)
+1:
+    BIT	4, (IX+sysvar_vdp_pflags)
+    JR	Z, 1b			 ; Wait for the result			
+    POP	IX
+    JP	XEQ
 			
 ; GET(x,y): Get the ASCII code of a character on screen
 ;
@@ -79,7 +81,7 @@ GETSCHR:		INC	IY
 			CALL	BRAKET			 ; Closing bracket		
 ;
 			PUSH	IX			 ; Get the system vars in IX
-			MOSCALL	mos_sysvars		 ; Reset the semaphore
+      LD  IX, (MOS_SYSVARS)
 			RES	1, (IX+sysvar_vdp_pflags)
 			VDU	23
 			VDU	0
@@ -111,7 +113,7 @@ POINT:			CALL    EXPRI      		 ; Get X coordinate
 			CALL	BRAKET			 ; Closing bracket		
 ;
 			PUSH	IX			 ; Get the system vars in IX
-			MOSCALL	mos_sysvars		 ; Reset the semaphore
+      LD    IX, (MOS_SYSVARS)
 			RES	2, (IX+sysvar_vdp_pflags)
 			VDU	23
 			VDU	0

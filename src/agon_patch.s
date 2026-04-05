@@ -122,7 +122,7 @@ OSLINE1:		PUSH	IY
 ; PUTIME: set current time to DE:HL, in centiseconds.
 ;
 PUTIME:			PUSH 	IX
-			MOSCALL	mos_sysvars
+      LD  IX, (MOS_SYSVARS)
 			LD	(IX + sysvar_time + 0), L
 			LD	(IX + sysvar_time + 1), H
 			LD	(IX + sysvar_time + 2), E
@@ -133,7 +133,7 @@ PUTIME:			PUSH 	IX
 ; GETIME: return current time in DE:HL, in centiseconds
 ;
 GETIME:			PUSH 	IX
-			MOSCALL	mos_sysvars
+      LD  IX, (MOS_SYSVARS)
 			LD	L, (IX + sysvar_time + 0)
 			LD	H, (IX + sysvar_time + 1)
 			LD	E, (IX + sysvar_time + 2)
@@ -154,7 +154,7 @@ PUTCSR:			LD	A, 0x1F			 ; TAB
 ; GETCSR: return cursor position in x=DE, y=HL
 ;
 GETCSR:			PUSH	IX			 ; Get the system vars in IX
-			MOSCALL	mos_sysvars		 ; Reset the semaphore
+      LD  IX, (MOS_SYSVARS)
 			RES	0, (IX+sysvar_vdp_pflags)
 			VDU	23
 			VDU	0
@@ -512,7 +512,7 @@ OSBYTE_13:		CALL	WAIT_VBLANK
 			JP	COUNT0
 ;
 WAIT_VBLANK:		PUSH 	IX			 ; Wait for VBLANK interrupt
-			MOSCALL	mos_sysvars		 ; Fetch pointer to system variables
+      LD  IX, (MOS_SYSVARS)
 			LD	A, (IX + sysvar_time + 0)
 1:			CP 	A, (IX + sysvar_time + 0)
 			JR	Z, 1b
@@ -538,7 +538,7 @@ OSBYTE_76:		VDU	23
 ; - L: The system variable to fetch
 ;
 OSBYTE_A0:		PUSH	IX
-			MOSCALL	mos_sysvars		 ; Fetch pointer to system variables
+      LD  IX, (MOS_SYSVARS)
 			LD	BC, 0			
 			LD	C, L			 ; BCU = L
 			ADD	IX, BC			 ; Add to IX
