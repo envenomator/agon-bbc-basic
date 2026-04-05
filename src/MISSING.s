@@ -7,7 +7,6 @@
   .global RECTAN
   .global SYS
   .global TINT
-  .global WAIT
   .global MODEFN
   .global LINE
 
@@ -35,7 +34,6 @@ ORIGIN:
 RECTAN:
 SYS:
 TINT:
-WAIT:
 MODEFN:
 LINE:
     RET
