@@ -59,10 +59,10 @@ _start:
 
     jp      START                ; Enter user code
 
-; Return safely to MOS (called from *BYE)
+; Return safely to MOS (called from *BYE / QUIT)
 _end:
     ld      sp, (_sps)           ; Restore stack pointer
-
+    ld      hl, 0                ; Make sure MOS doesn't show an error
     pop     iy
     pop     ix
     pop     de

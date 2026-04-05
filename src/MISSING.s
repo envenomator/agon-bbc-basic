@@ -4,7 +4,6 @@
   .global FILL
   .global MOUSE
   .global ORIGIN
-  .global BYE
   .global RECTAN
   .global SYS
   .global TINT
@@ -33,7 +32,6 @@ ELLIPS:
 FILL:
 MOUSE:
 ORIGIN:
-BYE:
 RECTAN:
 SYS:
 TINT:
