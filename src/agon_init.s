@@ -213,4 +213,4 @@ _sps:
     .space  3                   ; saved stack pointer
 
 _argv_ptrs:
-    .space  argv_ptrs_max, 0    ; argv pointer storage
+    .space  argv_ptrs_max*3, 0    ; argv pointer storage
