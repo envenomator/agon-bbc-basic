@@ -5,13 +5,10 @@
   .global MOUSE
   .global ORIGIN
   .global RECTAN
-  .global SYS
-  .global TINT
   .global MODEFN
   .global LINE
 
   .global WIDFN
-  .global TINTFN
   .global CIRCLE
   .global CSROFF
   .global CSRON
@@ -20,7 +17,6 @@
   .text
 
 WIDFN:
-TINTFN:
 CIRCLE:
 CSROFF:
 CSRON:
@@ -32,8 +28,6 @@ FILL:
 MOUSE:
 ORIGIN:
 RECTAN:
-SYS:
-TINT:
 MODEFN:
 LINE:
     RET

@@ -3,6 +3,9 @@
 
   .global BYE
   .global WAIT
+  .global SYS
+  .global TINT
+  .global TINTFN
 
   .extern VBLANK_STOP
   .extern TERMQ
@@ -56,3 +59,15 @@ WAIT1:
     ld      d, b
     ld      e, c
     jr      WAIT1
+;
+; Not implemented yet
+;
+TINT:
+TINTFN:
+SYS:
+	XOR	A
+	CALL	EXTERR
+	DEFM	'Sorry'
+	DEFB	0
+;
+
