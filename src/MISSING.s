@@ -5,19 +5,21 @@
   .global MOUSE
   .global ORIGIN
   .global RECTAN
-  .global MODEFN
-  .global LINE
-
-  .global WIDFN
-  .global CIRCLE
   .global CSROFF
   .global CSRON
   .global ONEDIT
   .global ONEDIT1
+
+  .global CIRCLE
+  .global LINE
+  .global MODEFN
+  .global WIDFN
   .text
 
-WIDFN:
 CIRCLE:
+LINE:
+MODEFN:
+WIDFN:
 CSROFF:
 CSRON:
 ONEDIT:
@@ -28,7 +30,5 @@ FILL:
 MOUSE:
 ORIGIN:
 RECTAN:
-MODEFN:
-LINE:
     RET
 

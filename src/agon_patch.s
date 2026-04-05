@@ -22,7 +22,7 @@
 			.global	PUTIME
 			.global	GETIME
 			.global	PUTCSR
-			.global 	GETCSR
+			.global GETCSR
 			.global	OSRDCH
 			.global	PROMPT
 			.global	OSKEY
@@ -45,6 +45,8 @@
 			.global	OSSAVE
 			.global	EXPR_W2
 			.global	STAR_VERSION
+      .global WAIT_VBLANK
+      .global READKEY
 
 			.extern	_end			 ; In init.asm
 

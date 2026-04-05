@@ -1,10 +1,12 @@
   .assume ADL = 1
 
   .global COUNT0
+  .global COUNT1
   .global INKEY1
 	.global	EXPR_24BIT_INT
 	.global	INT24_TO_32
 	.global	ITEMI24
+  .global TRUE
 
   .include "macros.inc"
   .text

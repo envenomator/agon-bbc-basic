@@ -10,6 +10,7 @@
   .global KEYCOUNT
   .global R0
   .global R1
+  .global SCRAP
   .global RAM_START
   .global RAM_END
   .global conversion_store
@@ -33,6 +34,7 @@ KEYASCII:    .space    1               ; ASCII code of pressed key
 KEYCOUNT:    .space    1               ; Counts every time a key is pressed
 R0:          .space    3               ; General purpose storage for 8/16 to 24 bit operations
 R1:          .space    3               ;
+SCRAP:       .space   31
 ;
 conversion_store:	ds 		4		; Scratch pad to convert integer representations
 ;

@@ -1,19 +1,12 @@
-  .include	"macros.inc"
-  .include	"equs.inc"
+  .include "macros.inc"
+  .include "mos.inc"
+  .include "equs.inc"
 
   .global BYE
   .global WAIT
-  .global SYS
-  .global TINT
-  .global TINTFN
-
-  .extern VBLANK_STOP
-  .extern TERMQ
-  .extern XEQ
-  .extern EXPRI
-  .extern GETIME
-  .extern TRAP
   .extern _end
+
+  .extern MOS_SYSVARS
 
   .assume	ADL = 1
   .text
@@ -59,15 +52,4 @@ WAIT1:
     ld      d, b
     ld      e, c
     jr      WAIT1
-;
-; Not implemented yet
-;
-TINT:
-TINTFN:
-SYS:
-	XOR	A
-	CALL	EXTERR
-	DEFM	'Sorry'
-	DEFB	0
-;
 

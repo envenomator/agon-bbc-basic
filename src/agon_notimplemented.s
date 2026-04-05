@@ -1,22 +1,24 @@
 ;
-; Title:	BBC Basic Interpreter - Z80 version
+; Title:	BBC Basic Interpreter - eZ80 version
 ;		Catch-all for unimplemented functionality
-; Author:	Dean Belfield
-; Created:	12/05/2023
-; Last Updated:	12/05/2023
 ;
-; Modinfo:
+; Author:	Jeroen Venema
 
-			.assume	ADL = 1
-
-			.text
-			
 			.global	ENVEL
 			.global	ADVAL
 			.global	PUTIMS
-			
+      .global TINT
+      .global TINTFN
+      .global SYS
+
 			.extern	EXTERR
-			
+
+			.assume	ADL = 1
+			.text
+
+SYS:
+TINT:
+TINTFN:
 ENVEL:
 ADVAL:
 PUTIMS:
