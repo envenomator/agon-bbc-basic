@@ -1,5 +1,5 @@
-  .assume ADL = 1
+    .assume     ADL = 1
 
-  .include "macros.inc"
-  .text
-  .include "bbc-ez80/ASMB.Z80"
+    .include    "macros.inc"
+    .text
+    .include    "bbc-ez80/ASMB.Z80"

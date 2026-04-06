@@ -9,9 +9,7 @@
 ; 04/04/2026:   Converted to GAS style
 ;
 
-    .extern        STAVAR
-    .extern        ACCS
-
+ARGV_PTRS_MAX:.equ 16 ; Maximum number of arguments allowed in argv
 RAM_Top:       .equ    0B0000h        ; Initial value of HIMEM
 SIZEW:          .equ    3              ; Size of a word (3 for ADL mode)
 

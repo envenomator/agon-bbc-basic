@@ -1,107 +1,91 @@
 ;
 ; Title: BBC Basic ADL for AGON - Initialisation Code
-; Initialisation Code
-; Author: Dean Belfield
-; Created: 12/05/2023
-; Last Updated: 02/04/2026
-;
-; Modinfo:
-; 11/07/2023: Fixed *BYE for ADL mode
-; 26/11/2023: Moved the ram clear routine into here
-; 02/04/2026: Converted to GAS style
 ;
 
-    .global _start
-    .global _end
+    .assume     ADL = 1
 
-    .extern START          ; In main.s
-    .extern RAM_START      ; In ram.asm
-    .extern RAM_SIZE       ; From linker.conf
-    .extern MOS_SYSVARS
+    .global     AGON_START
+    .global     AGON_END
 
-    .assume ADL = 1
-    .include "equs.inc"
-    .include "mos.inc"
-    .include "macros.inc"
+    .include    "equs.inc"
+    .include    "mos.inc"
+    .include    "macros.inc"
 
-argv_ptrs_max:    .equ 16         ; Maximum number of arguments allowed in argv
+    .section    .init
 
-    .section .init
+    JP          AGON_START
 
-    jp      _start                ; Jump to start
+EXEC_NAME:
+    .asciz      "BBCBASIC.BIN" ; Executable name (argv[0])
+    .balign     64
+    .ascii      "MOS"          ; MOS signature
+    .byte       0x00           ; Header version
+    .byte       0x01           ; Run mode (0=Z80, 1=ADL)
 
-_exec_name:
-    .asciz  "BBCBASIC.BIN"       ; Executable name (argv[0])
+AGON_START:
+    PUSH        AF             ; Preserve registers
+    PUSH        BC
+    PUSH        DE
+    PUSH        IX
+    PUSH        IY
 
-    .align  6                    ; 2^6 = 64 bytes
+    LD          (_sps), SP     ; Save 24-bit stack pointer
 
-    .ascii  "MOS"                ; MOS signature
-    .byte   0x00                 ; Header version
-    .byte   0x01                 ; Run mode (0=Z80, 1=ADL)
+    LD          IX, _argv_ptrs ; argv pointer array
+    PUSH        IX
+    CALL        PARSE_PARAMS
+    POP         IX             ; IX = argv
 
-_start:
-    push    af                   ; Preserve registers
-    push    bc
-    push    de
-    push    ix
-    push    iy
+    LD          B, 0           ; C = argc
+    CALL        CLEAR_RAM
+    CALL        GET_SYSVARS
 
-    ld      (_sps), sp           ; Save 24-bit stack pointer
-
-    ld      ix, _argv_ptrs       ; argv pointer array
-    push    ix
-    call    _parse_params
-    pop     ix                   ; IX = argv
-
-    ld      b, 0                 ; C = argc
-    call    _clear_ram
-    call    get_sysvars
-
-    jp      START                ; Enter user code
+    JP          START          ; Enter user code
 
 ; Return safely to MOS (called from *BYE / QUIT)
-_end:
-    ld      sp, (_sps)           ; Restore stack pointer
-    ld      hl, 0                ; Make sure MOS doesn't show an error
-    pop     iy
-    pop     ix
-    pop     de
-    pop     bc
-    pop     af
+AGON_END:
+    LD          SP, (_sps) ; Restore stack pointer
+    LD          HL, 0          ; Make sure MOS doesn't show an error
+    POP         IY
+    POP         IX
+    POP         DE
+    POP         BC
+    POP         AF
 
-    ret
-; Get pointer to sysvars
-get_sysvars:
-    push    bc
-    push    de
-    push    hl
-    push    ix
-    push    iy
+    RET
 
-    MOSCALL mos_sysvars
-    ld      (MOS_SYSVARS),IX
+; Store pointer to sysvars for later consumption immediately
+GET_SYSVARS:
+    PUSH        BC
+    PUSH        DE
+    PUSH        HL
+    PUSH        IX
+    PUSH        IY
 
-    pop     iy
-    pop     ix
-    pop     hl
-    pop     de
-    pop     bc
+    MOSCALL     mos_sysvars
+    LD          (MOS_SYSVARS),IX
 
-    ret
+    POP         IY
+    POP         IX
+    POP         HL
+    POP         DE
+    POP         BC
+
+    RET
 
 ; Clear application RAM
-_clear_ram:
-    push    bc
+CLEAR_RAM:
+    PUSH        BC
 
-    ld      hl, RAM_START
-    ld      de, RAM_START + 1
-    ld      bc, RAM_SIZE
-    xor     a
-    ld      (hl), a
-    ldir
+    LD          HL, RAM_START
+    LD          DE, RAM_START + 1
+    LD          BC, RAM_SIZE
+    XOR         A
+    LD          (HL), A
+    LDIR
 
-    pop     bc
-    ret
+    POP         BC
+    RET
 
 ;
 ; Parse parameter string into C-style argv array
@@ -113,53 +97,53 @@ _clear_ram:
 ; Out:
 ;   C  = argc
 ;
-_parse_params:
-    ld      bc, _exec_name
-    ld      (ix+0), bc           ; argv[0] = executable name
+PARSE_PARAMS:
+    LD          BC, EXEC_NAME
+    LD          (IX+0), BC         ; argv[0] = executable name
 
-    inc     ix
-    inc     ix
-    inc     ix
+    INC         IX
+    INC         IX
+    INC         ix
 
-    call    _skip_spaces
+    CALL        SKIP_SPACES
 
-    ld      bc, 1                ; argc = 1
-    ld      b, argv_ptrs_max-1   ; max remaining entries
+    LD          BC, 1              ; argc = 1
+    LD          B, ARGV_PTRS_MAX-1 ; max remaining entries
 
-_parse_params_1:
-    push    bc                   ; save argc
-    push    hl                   ; save token start
+1:
+    PUSH        BC                 ; save argc
+    PUSH        HL                 ; save token start
 
-    call    _get_token
+    CALL        GET_TOKEN
 
-    ld      a, c                 ; token length
-    pop     de                   ; token start
-    pop     bc                   ; argc
+    LD          A, C               ; token length
+    POP         DE                 ; token start
+    POP         BC                 ; argc
 
-    or      a
-    ret     z                    ; no more tokens
+    OR          A
+    RET         Z                  ; no more tokens
 
-    ld      (ix+0), de           ; store pointer
+    LD          (IX+0), DE         ; store pointer
 
-    push    hl
-    pop     de
+    PUSH        HL
+    POP         DE
 
-    call    _skip_spaces
+    CALL        SKIP_SPACES
 
-    xor     a
-    ld      (de), a              ; null terminate
+    XOR         A
+    LD          (DE), A            ; null terminate
 
-    inc     ix
-    inc     ix
-    inc     ix
+    INC         IX
+    INC         IX
+    INC         IX
 
-    inc     c                    ; argc++
+    INC         C                  ; argc++
 
-    ld      a, c
-    cp      b
-    jr      c, _parse_params_1
+    LD          A, C
+    CP          B
+    JR          C, 1b
 
-    ret
+    RET
 
 ;
 ; Get next token
@@ -171,23 +155,22 @@ _parse_params_1:
 ;   HL = first char after token
 ;   C  = length
 ;
-_get_token:
-    ld      c, 0
-
+GET_TOKEN:
+    LD          C, 0
 1:
-    ld      a, (hl)
-    or      a
-    ret     z
+    LD          A, (HL)
+    OR          A
+    RET         Z
 
-    cp      13                  ; CR
-    ret     z
+    CP          13 ; CR
+    RET         z
 
-    cp      ' '
-    ret     z
+    CP          ' '
+    RET         Z
 
-    inc     hl
-    inc     c
-    jr      1b
+    INC         HL
+    INC         C
+    JR          1b
 
 ;
 ; Skip spaces
@@ -198,19 +181,19 @@ _get_token:
 ; Out:
 ;   HL = first non-space
 ;
-_skip_spaces:
-    ld      a, (hl)
-    cp      ' '
-    ret     nz
+SKIP_SPACES:
+    LD          A, (HL)
+    CP          ' '
+    RET         NZ
 
-    inc     hl
-    jr      _skip_spaces
+    INC         HL
+    JR          SKIP_SPACES
 
 ;
 ; Storage
 ;
+    .section    .data
 _sps:
-    .space  3                   ; saved stack pointer
-
+    .space      3 ; saved stack pointer
 _argv_ptrs:
-    .space  argv_ptrs_max*3, 0    ; argv pointer storage
+    .space      ARGV_PTRS_MAX*3, 0 ; argv pointer storage
