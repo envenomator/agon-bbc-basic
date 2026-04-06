@@ -680,7 +680,7 @@ EXT_HANDLER_1:
 ;            
     LD          A,204 ; Throw a "Bad name" error
     CALL        EXTERR
-    DB          "Bad name", 0
+    .asciz      "Bad name"
 ;
 EXT_HANDLER_2:
     INC         DE ; Skip to the file extension # byte
@@ -811,7 +811,7 @@ OSBYTE:
 HUH:
     LD          A,254 ; Bad command error
     CALL        EXTERR
-    .ascii      "Bad command"
+    .asciz      "Bad command"
 
 ; OSBYTE 0x0B (FX 11,n): Keyboard auto-repeat delay
 ; Parameters:
