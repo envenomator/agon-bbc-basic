@@ -11,3 +11,7 @@
 # build directories
 bin/
 obj/
+
+# Apple
+.DS_Store
+include/.DS_Store
