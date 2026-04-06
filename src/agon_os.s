@@ -1078,16 +1078,16 @@ COMDS:
     .d24        STAR_EDIT
     DB          'F','X'+80h ; FX
     .d24        STAR_FX
-;            DB    'VERSIO','N'+80h    ; VERSION
-;            .d24    STAR_VERSION
+    DB          'VERSIO','N'+80h ; VERSION
+    .d24        STAR_VERSION
     DB          0xFF
 
 ;
 ; *BYE/QUIT
 ;
 BYE:
-    call        VBLANK_STOP
-    jp          AGON_END 
+    CALL        VBLANK_STOP
+    JP          AGON_END 
 
 ; *EDIT linenum
 ;
@@ -1120,6 +1120,13 @@ STAR_EDIT:
     CALL        OSEDIT
     CALL        C,CLEAN ; Set TOP, write out &FFFF end of program marker
     JP          CLOOP ; Jump back to immediate mode
+
+; *VERSION
+;
+STAR_VERSION:
+    CALL    TELL    ; Output the welcome message
+    .asciz    	"AGON ADL release v0.1\n\r"
+    RET
 
 ; OSCLI FX n
 ;
