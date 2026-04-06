@@ -26,20 +26,22 @@ STRVAL_SIZE	EQU	5
     POP \rp2
 .endm
 
-.macro ADD8U_DE reg
-    ADD A, E
-    LD E, A
-    ADC A, D
-    SUB E
-    LD D, A
+.macro ADD8U_HL
+    PUSH    DE
+    LD      DE, 0
+    LD      E, A
+    ADD     HL, DE
+    POP     DE
 .endm
 
-.macro ADD8U_HL reg
-    ADD A, L
-    LD L, A
-    ADC A, H
-    SUB L
-    LD H, A
+.macro ADD8U_DE
+    PUSH    HL
+    EX      DE, HL
+    LD      DE, 0
+    LD      E, A
+    ADD     HL, DE
+    EX      DE, HL
+    POP     HL
 .endm
 
 .macro VDU VAL

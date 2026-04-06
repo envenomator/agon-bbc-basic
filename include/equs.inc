@@ -15,6 +15,11 @@
 RAM_Top:       .equ    0B0000h        ; Initial value of HIMEM
 SIZEW:          .equ    3              ; Size of a word (3 for ADL mode)
 
+;ESC   .equ	1BH
+TBY   .equ	0FH
+TTO   .equ	0B8H
+TFILL .equ	03H
+
 ; For GPIO
 ; PA not available on eZ80L92
 ;

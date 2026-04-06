@@ -4,6 +4,8 @@
   .global BAD
   .global NEWIT
   .global LISTIT
+  .global DEL
+  .global LINNUM
 
   .include "macros.inc"
   .text
