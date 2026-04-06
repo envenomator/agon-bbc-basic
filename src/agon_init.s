@@ -29,7 +29,7 @@ AGON_START:
     PUSH        IX
     PUSH        IY
 
-    LD          (_sps), SP     ; Save 24-bit stack pointer
+    LD          (SP_EXIT), SP  ; Save MOS area stack pointer
 
     LD          IX, _argv_ptrs ; argv pointer array
     PUSH        IX
@@ -44,7 +44,7 @@ AGON_START:
 
 ; Return safely to MOS (called from *BYE / QUIT)
 AGON_END:
-    LD          SP, (_sps) ; Restore stack pointer
+    LD          SP, (SP_EXIT) ; Restore stack pointer
     LD          HL, 0          ; Make sure MOS doesn't show an error
     POP         IY
     POP         IX
@@ -193,7 +193,7 @@ SKIP_SPACES:
 ; Storage
 ;
     .section    .data
-_sps:
+SP_EXIT:
     .space      3 ; saved stack pointer
 _argv_ptrs:
     .space      ARGV_PTRS_MAX*3, 0 ; argv pointer storage
