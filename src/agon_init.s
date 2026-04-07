@@ -30,7 +30,7 @@ AGON_START:
     PUSH        IY
 
     LD          (SP_EXIT), SP  ; Save MOS area stack pointer
-
+    LD          SP, STACKTOP   ; Set the new stack pointer for the program (from linker.conf)
     LD          IX, _argv_ptrs ; argv pointer array
     PUSH        IX
     CALL        PARSE_PARAMS
