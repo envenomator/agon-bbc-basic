@@ -110,7 +110,7 @@ OSWRCH:
     JR          Z, OSWRCH_FILE ; Then we are outputting to a file
 ;
     POP         HL ; Otherwise
-    RST.LIS     10h ; Output the character to MOS
+    RST.LIL     10h ; Output the character to MOS
     RET
 ;    
 OSWRCH_BUFFER:
@@ -770,7 +770,7 @@ OSWORD_07: EQU    AGON_SOUND
 OSWORD_09:
     LD          DE,(SCRAP+0)
     LD          HL,(SCRAP+2)
-    CALL        POINT
+    CALL        AGON_POINT
     LD          (SCRAP+4),A
     RET
 
@@ -1294,26 +1294,26 @@ GETCSR:
 ;
 ;POINT - var=POINT(x,y)
 ;
-;POINT:    CALL    EXPRI
-;    EXX
-;    PUSH    HL
-;    CALL    CEXPRI
-;    EXX
-;    POP    DE
-;    CALL    BRAKET
-;    LD    IX,SCRAP
-;    LD    (IX+0),E
-;    LD    (IX+1),D
-;    LD    (IX+2),L
-;    LD    (IX+3),H
-;    LD    HL,SCRAP
-;    LD    A,9
-;    CALL    OSWORD
-;    LD    A,(IX+4)
-;    LD    L,A
-;    ADD    A,1
-;    SBC    A,A
-;    LD    H,A
+POINT:    CALL    EXPRI
+    EXX
+    PUSH    HL
+    CALL    CEXPRI
+    EXX
+    POP    DE
+    CALL    BRAKET
+    LD    IX,SCRAP
+    LD    (IX+0),E
+    LD    (IX+1),D
+    LD    (IX+2),L
+    LD    (IX+3),H
+    LD    HL,SCRAP
+    LD    A,9
+    CALL    OSWORD
+    LD    A,(IX+4)
+    LD    L,A
+    ADD    A,1
+    SBC    A,A
+    LD    H,A
 RETEXX:
     EXX
     LD          H,A
@@ -1409,25 +1409,31 @@ SOUND2:
     LD          A,7
     CALL        OSWORD
     JP          XEQ
+
 ;
-;MODE - MODE n
+; MODE n: Set video mode
 ;
 MODE:
-    CALL        EXPRI
-    XOR         A
-    LD          (COUNT),A
+    PUSH	IX
+    LD    IX,   (MOS_SYSVARS)
+    RES   4,    (IX+sysvar_vdp_pflags)
+    CALL  EXPRI
     EXX
-    LD          H,L
-    LD          L,22
-    CALL        WRCH2
-    JP          XEQGO1
+    VDU   16h			                      ; Mode change
+    VDU   L
+    LD    IX,   (MOS_SYSVARS)
+1:  BIT	4, (IX+sysvar_vdp_pflags)
+    JR	Z, 1b                           ; Wait for the result			
+    POP	IX
+    JP	XEQ
+
 ;
 ;CLG
 ;
 CLG:
     LD          A,16
     CALL        OSWRCH
-    JR          XEQGO1
+    JP          XEQGO1
 ;
 ;ORIGIN x,y
 ;
@@ -1440,53 +1446,59 @@ ORIGIN:
     POP         DE
     LD          C,29
     CALL        WRCH5
-    JR          XEQGO1
-;
-;COLOUR n
-;COLOUR n,p
-;COLOUR n,r,g,b
+    JP          XEQGO1
+
+
+; COLOUR colour
+; COLOUR L,P
+; COLOUR L,R,G,B
 ;
 COLOUR:
-    CALL        EXPRI ;n
+    CALL	EXPRI			; The colour / mode
     EXX
-    LD          A,(IY)
-    CP          ','
-    JR          Z,PALCOL
-    LD          H,L
-    LD          L,17
-    CALL        WRCH2
-    JR          XEQGO1
-;
-PALCOL:
-    PUSH        HL
-    CALL        CEXPRI ;p or r
+    LD	A, L 
+    LD	(VDU_BUFFER+0), A	; Store first parameter
+    CALL	NXT			; Are there any more parameters?
+    CP	','
+    JR	Z, 1f	; Yes, so we're doing a palette change next
+    VDU	11h			; Just set the colour
+    VDU	(VDU_BUFFER+0)
+    JP	XEQ			
+1:
+    CALL	COMMA
+    CALL	EXPRI			; Parse R (OR P)
     EXX
-    EX          DE,HL
-    LD          HL,0
-    LD          A,(IY)
-    CP          ','
-    JR          NZ,PALET1
-    PUSH        DE
-    CALL        CEXPRI ;g
+    LD	A, L
+    LD	(VDU_BUFFER+1), A
+    CALL	NXT			; Are there any more parameters?
+    CP	','
+    JR	Z, 1f		; Yes, so we're doing COLOUR L,R,G,B
+    VDU	13h			; VDU:COLOUR
+    VDU	(VDU_BUFFER+0)		; Logical Colour
+    VDU	(VDU_BUFFER+1)		; Palette Colour
+    VDU	0			; RGB set to 0
+    VDU	0
+    VDU	0
+    JP	XEQ
+1:
+    CALL	COMMA
+    CALL	EXPRI			; Parse G
     EXX
-    PUSH        HL
-    CALL        CEXPRI ;b
+    LD	A, L
+    LD	(VDU_BUFFER+2), A
+    CALL	COMMA
+    CALL	EXPRI			; Parse B
     EXX
-    POP         DE
-    POP         BC
-    LD          A,L
-    POP         HL
-    LD          D,C ;r
-    LD          C,L ;n
-    LD          L,E ;g
-    LD          H,A ;b
-    LD          E,16
-    PUSH        BC
-PALET1:
-    POP         BC
-    LD          B,19
-    CALL        WRCH6
-    JR          XEQGO1
+    LD	A, L
+    LD	(VDU_BUFFER+3), A							
+    VDU	13h			; VDU:COLOUR
+    VDU	(VDU_BUFFER+0)		; Logical Colour
+    VDU	0xFF			; Physical Colour (-1 for RGB mode)
+    VDU	(VDU_BUFFER+1)		; R
+    VDU	(VDU_BUFFER+2)		; G
+    VDU	(VDU_BUFFER+3)		; B
+    JP	XEQ
+
 ;
 ;GCOL [a,]b
 ;
@@ -2323,14 +2335,14 @@ GETSCHR:
     POP         IX
     RET
 
-; POINT(x,y): Get the pixel colour of a point on screen
+; AGON_POINT(x,y): Get the pixel colour of a point on screen
 ; Parameters:
 ; - DE: X-coordinate
 ; - HL: Y-coordinate
 ; Returns:
 ; -  A: Pixel colour
 ;
-POINT:
+AGON_POINT:
     PUSH        IX ; Get the system vars in IX
     LD          IX, (MOS_SYSVARS)
     RES         2, (IX+sysvar_vdp_pflags)
@@ -2341,9 +2353,11 @@ POINT:
     VDU         D
     VDU         L
     VDU         H
-1:
-    BIT         2, (IX+sysvar_vdp_pflags)
+1:  BIT         2, (IX+sysvar_vdp_pflags)
     JR          Z, 1b ; Wait for the result
+    LD          A, (IX+(sysvar_scrpixelIndex))
+    POP         IX	
+    RET
 
 ; AGON_SOUND channel,volume,pitch,duration
 ; Parameters:
