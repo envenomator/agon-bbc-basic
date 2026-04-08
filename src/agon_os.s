@@ -64,6 +64,7 @@
     .global     TINTFN
     .global     MODEFN
     .global     WIDFN
+    .global     STAR_VERSION
 
     .include    "macros.inc"
     .include    "mos.inc"

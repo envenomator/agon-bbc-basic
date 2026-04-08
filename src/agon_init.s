@@ -31,16 +31,40 @@ AGON_START:
 
     LD          (SP_EXIT), SP  ; Save MOS area stack pointer
     LD          SP, STACKTOP   ; Set the new stack pointer for the program (from linker.conf)
+    CALL        CLEAR_RAM
     LD          IX, _argv_ptrs ; argv pointer array
     PUSH        IX
     CALL        PARSE_PARAMS
-    POP         IX             ; IX = argv
-
-    LD          B, 0           ; C = argc
-    CALL        CLEAR_RAM
+    POP         IX
     CALL        GET_SYSVARS
-
-    JP          START          ; Enter user code
+    LD          HL, ACCS       ; Clear the ACCS
+    LD          (HL), 0
+    LD          B, 0           ; C = argc
+    LD          A, C			
+    CP          2
+    JR          Z, AUTOLOAD	 	  ; 2 parameters = autoload
+    JR          C, STARTBASIC   ; 1 parameter (program name) = normal start
+    CALL        STAR_VERSION    ; Output the AGON version
+    CALL        TELL
+    .ascii      "Usage:\n\r"
+    .asciz      "BBCBASIC <filename>\n\r"
+    JR          AGON_END
+;							
+AUTOLOAD:
+    LD          HL, (IX+3)  ; HLU: Address of filename
+    LD          DE, ACCS		;  DE: Destination address
+1:  LD          A, (HL)			; Fetch the filename byte
+    LD          (DE), A			; 
+    INC         HL			    ; Increase the source pointer
+    INC         E           ; We only need to increase E as ACCS is on a page boundary
+    OR          A
+    JR          NZ, 1b      ; Loop until we hit a 0 byte
+    DEC         E
+    LD          A, CR
+    LD          (DE), A     ; Replace the 0 byte with a CR for BBC BASIC
+;
+STARTBASIC:
+    JP          START       ; Start BASIC
 
 ; Return safely to MOS (called from *BYE / QUIT)
 AGON_END:
@@ -75,6 +99,8 @@ GET_SYSVARS:
 
 ; Clear application RAM
 CLEAR_RAM:
+    PUSH        HL
+    PUSH        DE
     PUSH        BC
 
     LD          HL, RAM_START
@@ -85,6 +111,8 @@ CLEAR_RAM:
     LDIR
 
     POP         BC
+    POP         DE
+    POP         HL
     RET
 
 ;

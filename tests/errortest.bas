@@ -15,8 +15,8 @@
   230 E% = 10 : DIM QQ(-1) : REM Bad DIM statement
   240 E% = 15 : DIM C(10),C(11) : REM Bad subscript
   250 E% = 15 : DIM A(10):DIM A(11) : REM Bad subscript
-  260 E% = 11 : DIM E((HIMEM-PAGE)/5) : REM DIM space
-  270 E% = 11 : DIM F((HIMEM-PAGE)/5) : REM DIM space
+  260 REM E% = 11 : DIM E((HIMEM-PAGE)/5) : REM DIM space
+  270 REM E% = 11 : DIM F((HIMEM-PAGE)/5) : REM DIM space
   280 E% = 11 : DIM A% (HIMEM-PAGE)/2,A% (HIMEM-PAGE)/2 : REM DIM space
   290 E% = 11 : DIM B% -1 : DIM A% HIMEM-B%-256 : REM DIM space
   300 E% = 11 : DIM E HIMEM-PAGE : REM DIM space
@@ -101,8 +101,10 @@
  1270     END
  1290     
  1300     DEF FNerror
- 1310     L% = R%!1 AND &FFFF
+ 1310     L% = ?(R%+1) + 256 * ?(R%+2)
+ 1315     REM L% = R%!1 AND &FFFF
  1330     IF ERL <> L% PRINT "An error should have occurred at line ";L% " but didn't" : STOP
  1340     IF ERR <> E% PRINT "Error number was "; ERR " but should have been "; E% " at line ";ERL : STOP
  1350     R% += ?R%
- 1360     = R%!1 AND &FFFF
+ 1355     REM = R%!1 AND &FFFF
+ 1360     = ?(R%+1) + 256 * ?(R%+2)
