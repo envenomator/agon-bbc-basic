@@ -241,7 +241,7 @@ FIL.obj.objsize: .equ 0x0B
 ;	obj:		.TAG	FFOBJID	; Object identifier
 ;	flag:		DS	1	; File status flags
 ;	err:		DS	1	; Abort flag (error code)
-FIL.fptr  .equ 11
+FIL.fptr  .equ 0x11
 ;	fptr:		DS	4	; File read/write pointer (Zeroed on file open)
 ;	clust:		DS	4	; Current cluster of fpter (invalid when fptr is 0)
 ;	sect:		DS	4	; Sector number appearing in buf[] (0:invalid)
