@@ -612,6 +612,7 @@ OSSAVE_TXT1:
     OR          A
     JR          Z, OSSAVE_TXT2
     INC         HL ; Skip the length byte
+    LD          DE, 0   ; ADL - make sure to start with all 0
     LD          E, (HL) ; Get the line number
     INC         HL
     LD          D, (HL)
