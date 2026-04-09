@@ -10,7 +10,6 @@ Work in progress
 The following keywords are not yet supported:
 - SYS
 - TINT
-- TINTFN
 
 ### Installation
 Copy the 'bbcbasic.bin' file to the /bin folder of your SD card.
