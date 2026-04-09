@@ -1,25 +1,17 @@
 ;
 ; Title:        BBC Basic for AGON - .equs
-; Author:       Dean Belfield
-; Created:      12/05/2023
-; Last Updated: 02/04/2026
+
+ARGV_PTRS_MAX:.equ 16 ; Maximum number of arguments parsed in argv
+
+CR:             .equ    0Dh
+LF:             .equ    0Ah
+ESC:            .equ    1Bh
+SINGLE_QUOTE    .equ    27h
+BACK_SLASH      .equ    5Ch
+STRVAL_SIZE     .equ    5
+
 ;
-; Modinfo:
-; 08/06/2023:   Added SIZEW
-; 04/04/2026:   Converted to GAS style
-;
-
-ARGV_PTRS_MAX:.equ 16 ; Maximum number of arguments allowed in argv
-RAM_Top:       .equ    0B0000h        ; Initial value of HIMEM
-SIZEW:          .equ    3              ; Size of a word (3 for ADL mode)
-
-;ESC   .equ	1BH
-TBY   .equ	0FH
-TTO   .equ	0B8H
-TFILL .equ	03H
-
 ; For GPIO
-; PA not available on eZ80L92
 ;
 PA_DR:          .equ    96h
 PA_DDR:         .equ    97h
@@ -49,9 +41,5 @@ GPIOMODE_INTAH: .equ    7              ; Interrupt, Active High
 GPIOMODE_INTFE: .equ    8              ; Interrupt, Falling Edge
 GPIOMODE_INTRE: .equ    9              ; Interrupt, Rising Edge
 
-; Originally in ram.asm
-;
-OC:             .equ    STAVAR+15*4    ; CODE ORIGIN (O%)
-PC:             .equ    STAVAR+16*4    ; PROGRAM COUNTER (P%)
 VDU_BUFFER:     .equ    ACCS           ; Storage for VDU commands
 

@@ -8,6 +8,8 @@
     .global     ITEMI24
     .global     TRUE
     .global     CONVERT_TO_I24
+
+    .include    "equs.inc"
     .include    "macros.inc"
     .text
 

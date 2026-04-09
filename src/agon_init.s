@@ -18,9 +18,9 @@
 EXEC_NAME:
     .asciz      "BBCBASIC.BIN"  ; Executable name (argv[0])
 chain_start:
-    .asciz      "CHAIN  \x22"
+    .asciz      "CHAIN  \x22"   ; Begin part of chain string
 chain_end:
-    .byte       0x22,0x0d,0     ; End part of string
+    .byte       0x22,0x0d,0     ; End part of chain string
     .balign     64
     .ascii      "MOS"           ; MOS signature
     .byte       0x00            ; Header version

@@ -7,6 +7,7 @@
     .global     DEL
     .global     LINNUM
 
+    .include    "equs.inc"
     .include    "macros.inc"
     .text
     .include    "bbc-ez80/MAIN.Z80"

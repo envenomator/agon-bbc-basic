@@ -13,6 +13,7 @@
     .global     RAM_END
     .global     conversion_store
 
+    .include    "equs.inc"
     .include    "macros.inc"
 
     .section    .data

@@ -1,31 +1,6 @@
 ;
 ; Title:	AGON MOS - API for user projects
-; Author:	Dean Belfield
-; Created:	03/08/2022
-; Last Updated:	12/03/2026
-; Adjusted for fasmg assembler (Paul Cawte, 16/06/2023)
-; Adjusted for MOS 3.0 API (Jeroen Venema, 18/04/2025)
 ;
-; Modinfo:
-; 05/08/2022:	Added mos_feof
-; 09/08/2022:	Added system variables: cursorX, cursorY
-; 18/08/2022:	Added system variables: scrchar, scrpixel, audioChannel, audioSuccess, vdp_pflags
-; 05/09/2022:	Added mos_ren, vdp_pflag_mode
-; 24/09/2022:	Added mos_getError, mos_mkdir
-; 13/10/2022:	Added mos_oscli
-; 23/02/2023:	Added more sysvars, fixed typo in sysvar_audioSuccess, offsets for sysvar_scrCols, sysvar_scrRows
-; 04/03/2023:	Added sysvar_scrpixelIndex
-; 08/03/2023:	Renamed sysvar_keycode to sysvar_keyascii, added sysvar_vkeycode
-; 15/03/2023:	Added mos_copy, mos_getrtc, mos_setrtc, rtc, vdp_pflag_rtc
-; 21/03/2023:	Added mos_setintvector, sysvars for keyboard status, vdu codes for vdp
-; 22/03/2023:	The VDP commands are now indexed from 0x80
-; 29/03/2023:	Added mos_uopen, mos_uclose, mos_ugetc, mos_uputc
-; 13/04/2023:	Added FatFS file structures (FFOBJID, FIL, DIR, FILINFO)
-; 15/04/2023:	Added mos_getfil, mos_fread, mos_fwrite and mos_flseek
-; 18/11/2023:	Added _mos_setkbvector, _mos_getkbmap, _mos_i2c_open, _mos_i2c_close, _mos_i2c_write, _mos_i2c_read
-; 18/04/2025: Added remaining ffs_* API values in MOS 2.20 / 3.0
-; 11/11/2025: Added 0x27+ sysvar offsets
-; 12/03/2026: Added FILINFO.attrib attribute bits
 
 ; VDP control (VDU 23, 0, n)
 ;
@@ -192,7 +167,7 @@ sysvar_scrHeight        := 0x011	 ; 2: Screen height in pixels
 sysvar_scrCols          := 0x013	 ; 1: Screen columns in characters
 sysvar_scrRows          := 0x014	 ; 1: Screen rows in characters
 sysvar_scrColours       := 0x015	 ; 1: Number of colours displayed
-sysvar_scrpixelIndex	:= 0x016	 ; 1: Index of pixel data read from screen
+sysvar_scrpixelIndex    := 0x016	 ; 1: Index of pixel data read from screen
 sysvar_vkeycode         := 0x017	 ; 1: Virtual key code from FabGL
 sysvar_vkeydown         := 0x018	 ; 1: Virtual key state from FabGL (0=up, 1=down)
 sysvar_vkeycount        := 0x019	 ; 1: Incremented every time a key packet is received

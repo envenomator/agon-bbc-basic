@@ -1,10 +1,5 @@
-; Title: BBC Basic Interpreter - Z80 version
-; Useful macros
-; Author: Dean Belfield
-; Created: 04/12/2024
-; Last Updated: 04/04/2026
-;
-; Modinfo:
+; Title: BBC Basic Interpreter - eZ80 version
+; Required macros
 
 .macro    LOG param
   ; Empty macro to disable upstream logging
@@ -14,12 +9,6 @@
 	XDEF	\addr
 .endm
 
-CR:		EQU     0DH
-LF:		EQU     0AH
-ESC:		EQU     1BH
-SINGLE_QUOTE	EQU 	27H
-BACK_SLASH	EQU	5Ch
-STRVAL_SIZE	EQU	5
 
 .macro PTR	addr
 	d24	\addr

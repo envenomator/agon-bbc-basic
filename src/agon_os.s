@@ -70,6 +70,11 @@
     .include    "mos.inc"
     .include    "equs.inc"
 
+; For Graphics
+TBY             .equ    0Fh
+TTO             .equ    0B8h
+TFILL           .equ    03h
+
     .text
 
 ;OSINIT - Initialise RAM mapping etc.
@@ -85,7 +90,7 @@ OSINIT:
     XOR         A
     LD          (FLAGS), A ; Clear flags and set F = Z
     LD          HL, USER
-    LD          DE, RAM_Top
+    LD          DE, RAM_TOP
     LD          E, A ; Page boundary
     LD          A, (ACCS) ; Return NZ if there is a file to chain
     OR          A
