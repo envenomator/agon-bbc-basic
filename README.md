@@ -1,6 +1,6 @@
-# A port of BBC Basic V to the Agon Platform in ADL/ez80 mode
+# A port of BBC Basic V to the Agon Platform in eZ80/ADL mode
 
-A port of BBC Basic for Z80 by R.T.Russell.  Modified to run in ADL mode on the Agon Platform.
+A port of BBC Basic for Z80 by R.T.Russell.  Modified to run in eZ80/ADL mode on the Agon Platform.
 This port is targetting to be functionally compatible with BBC Basic V5 for the Z80 as per upstream repo https://github.com/rtrussell/BBCZ80
 
 ### Status

@@ -12,5 +12,6 @@
 * Maintainer of this specific [fork](https://codeberg.org/dinoboards/eZ80-for-rc-basic)
 
 **Jeroen Venema**
-* Ported BBC Basic V v5.0 to the Agon platform in ADL mode, based on Dean Netherton's work
+* Ported BBC Basic V to the Agon platform in eZ80/ADL mode
+* Added MLT optimization to MUL16/IMUL code for performance
 
