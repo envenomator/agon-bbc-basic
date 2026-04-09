@@ -16,78 +16,64 @@
     JP          AGON_START
 
 EXEC_NAME:
-    .asciz      "BBCBASIC.BIN" ; Executable name (argv[0])
+    .asciz      "BBCBASIC.BIN"  ; Executable name (argv[0])
+chain_start:
+    .asciz      "CHAIN  \x22"
+chain_end:
+    .byte       0x22,0x0d,0     ; End part of string
     .balign     64
-    .ascii      "MOS"          ; MOS signature
-    .byte       0x00           ; Header version
-    .byte       0x01           ; Run mode (0=Z80, 1=ADL)
+    .ascii      "MOS"           ; MOS signature
+    .byte       0x00            ; Header version
+    .byte       0x01            ; Run mode (0=Z80, 1=ADL)
 
 AGON_START:
-    PUSH        AF             ; Preserve registers
+    PUSH        AF              ; Preserve registers
     PUSH        BC
     PUSH        DE
     PUSH        IX
     PUSH        IY
 
-    LD          (SP_EXIT), SP  ; Save MOS area stack pointer
-    LD          SP, STACKTOP   ; Set the new stack pointer for the program (from linker.conf)
+    LD          (SP_EXIT), SP   ; Save MOS area stack pointer
+    LD          SP, STACKTOP    ; Set the new stack pointer for the program (from linker.conf)
     CALL        CLEAR_RAM
-    LD          IX, _argv_ptrs ; argv pointer array
-    PUSH        IX
+    PUSH        HL
+
     CALL        PARSE_PARAMS
-    POP         IX
     CALL        GET_SYSVARS
-    LD          HL, ACCS       ; Clear the ACCS
+    LD          HL, ACCS        ; Clear the ACCS
     LD          (HL), 0
-    LD          B, 0           ; C = argc
+    POP         HL
+    LD          B, 0            ; C = argc
     LD          A, C			
     CP          2
-    JR          Z, AUTOLOAD	 	 ; 2 parameters = autoload
-    JR          C, STARTBASIC  ; 1 parameter (program name) = normal start
-    CALL        STAR_VERSION   ; Output the AGON version
+    JR          Z, AUTOLOAD	 	  ; 1 parameters = autoload
+    JR          C, STARTBASIC   ; 0 parameter (program name) = normal start
+    CALL        STAR_VERSION    ; Output the AGON version
     CALL        TELL
     .ascii      "Usage:\n\r"
     .asciz      "BBCBASIC <filename>\n\r"
     JR          AGON_END
 ;							
 ; Copies CHAIN prefix and filename to ACCS, sets boolean STARTUPCMD
-AUTOLOAD:                      
-    LD          DE, ACCS
-    LD          HL, CHAINTXT
-1:  LD          A, (HL)
-    OR          A
-    JR          Z, 1f
-    LD          (DE), A
-    INC         HL
-    INC         DE
-    JR          1b
-1:  LD          HL, (IX+3)     ; argv[1] filename argument
-1:  LD          A, (HL)
-    OR          A
-    JR          Z, 1f
-    LD          (DE), A
-    INC         HL
-    INC         E
-    JR          1b
-1:  LD          A, '"'         ; Add trailing quotes
-    LD          (DE), A
-    INC         E
-    LD          A, CR
-    LD          (DE), A
-    INC         E
-    XOR         A
-    LD          (DE), A        ; optional trailing NUL
-
+AUTOLOAD:
+    PUSH        HL              ; save original parameter string
+    LD          IX, ACCS
+    LD          HL, chain_start ; copy start of string
+    CALL        APPEND_CSTR
+    POP         HL
+    CALL        APPEND_CSTR     ; append filename
+    LD          HL, chain_end
+    CALL        APPEND_CSTR     ; append string close
     LD          A, 1
-    LD          (STARTUPCMD), A
+    LD          (STARTUPCMD), A ; mark autostart
 ;
 STARTBASIC:
-    JP          START          ; Start BASIC
+    JP          START           ; Start BASIC
 
 ; Return safely to MOS (called from *BYE / QUIT)
 AGON_END:
-    LD          SP, (SP_EXIT)  ; Restore stack pointer
-    LD          HL, 0          ; Make sure MOS doesn't show an error
+    LD          SP, (SP_EXIT)   ; Restore stack pointer
+    LD          HL, 0           ; Make sure MOS doesn't show an error
     POP         IY
     POP         IX
     POP         DE
@@ -95,6 +81,24 @@ AGON_END:
     POP         AF
 
     RET
+
+; Appends C-string to target
+;
+; In:
+;   HL = pointer to string
+;   IX = pointer to target
+;
+; Out:
+;   IX points to first ending zero in string
+;
+APPEND_CSTR:
+    LD          A, (HL)
+    LD          (IX+0), A
+    OR          A
+    RET         Z
+    INC         HL
+    INC         IX 
+    JR          APPEND_CSTR
 
 ; Store pointer to sysvars for later consumption immediately
 GET_SYSVARS:
@@ -134,62 +138,39 @@ CLEAR_RAM:
     RET
 
 ;
-; Parse parameter string into C-style argv array
+; Parse parameter string
 ;
 ; In:
 ;   HL = parameter string
-;   IX = argv storage
-;
+;   IX = pointer to empty array of stringpointers
 ; Out:
-;   C  = argc
+;   C  = number of parameters in argc style, counting 'filename' which isn't given by MOS
+;   Tokenized in-place parameter string with zeroes
 ;
 PARSE_PARAMS:
-    LD          BC, EXEC_NAME
-    LD          (IX+0), BC         ; argv[0] = executable name
-
-    INC         IX
-    INC         IX
-    INC         ix
-
-    CALL        SKIP_SPACES
-
-    LD          BC, 1              ; argc = 1
-    LD          B, ARGV_PTRS_MAX-1 ; max remaining entries
-
+    LD          BC, 1              ; Skip checking filename
+    LD          B, ARGV_PTRS_MAX-1
 1:
-    PUSH        BC                 ; save argc
+    PUSH        BC                 ; save counter
     PUSH        HL                 ; save token start
-
     CALL        GET_TOKEN
-
     LD          A, C               ; token length
     POP         DE                 ; token start
     POP         BC                 ; argc
-
     OR          A
     RET         Z                  ; no more tokens
-
-    LD          (IX+0), DE         ; store pointer
-
     PUSH        HL
     POP         DE
-
     CALL        SKIP_SPACES
-
     XOR         A
     LD          (DE), A            ; null terminate
-
     INC         IX
     INC         IX
     INC         IX
-
-    INC         C                  ; argc++
-
+    INC         C
     LD          A, C
     CP          B
     JR          C, 1b
-
-    RET
 
 ;
 ; Get next token
@@ -207,13 +188,10 @@ GET_TOKEN:
     LD          A, (HL)
     OR          A
     RET         Z
-
     CP          13 ; CR
     RET         z
-
     CP          ' '
     RET         Z
-
     INC         HL
     INC         C
     JR          1b
@@ -241,9 +219,3 @@ SKIP_SPACES:
     .section    .data
 SP_EXIT:
     .space      3 ; saved stack pointer
-_argv_ptrs:
-    .space      ARGV_PTRS_MAX*3, 0 ; argv pointer storage
-CHAINTXT:
-    .ascii      "CHAIN "
-    .byte       34; '"'
-    .byte       0
