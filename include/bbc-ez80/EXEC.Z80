@@ -3305,19 +3305,87 @@ X14OR5:	PUSH	DE
 ;           Carry set if overflow
 ; Destroys: A,D,E,H,L,F
 ;
-MUL16:	EX	DE,HL
-	LD	HL,0
-	LD	A,16
-MUL161:	ADD	HL,HL
-	RET	C		;OVERFLOW
-	SLA	E
-	RL	D
-	JR	NC,MUL162
-	ADD	HL,BC
-	RET	C
-MUL162:	DEC	A
-	JR	NZ,MUL161
+; Fast eZ80 version using MLT.
+;
+; Decompose operands as:
+;   HL = 256*H + L
+;   BC = 256*B + C
+;
+; If both high bytes are non-zero then the product is at least
+;   256 * 256 = 65536
+; so overflow is guaranteed and we can return immediately with carry set.
+;
+; The only non-overflow cases are therefore:
+;   1) H = 0, B = 0   -> 8 x 8
+;   2) B = 0          -> 16 x 8
+;   3) H = 0          -> 8 x 16
+;
+; For the 16 x 8 / 8 x 16 cases:
+;   (256*h + l) * c = (l*c) + ((h*c) << 8)
+;   l*c is formed with one MLT and the cross-term with a second MLT.
+;
+MUL16:	LD	A,B
+	OR	A
+	JR	Z,MUL16_B0	; multiplier fits in 8 bits
+	LD	A,H
+	OR	A
+	JR	Z,MUL16_H0	; multiplicand fits in 8 bits
+	SCF			; both high bytes non-zero -> guaranteed overflow
 	RET
+;
+; BC = 8-bit (B = 0)
+;
+MUL16_B0:	LD	A,H
+	OR	A
+	JR	NZ,MUL16_16X8
+;
+; 8 x 8: HL = L * C
+;
+	LD	D,L
+	LD	E,C
+	MLT	DE
+	EX	DE,HL
+	OR	A			; clear carry
+	RET
+;
+; 16 x 8: HL = (L*C) + ((H*C) << 8)
+;
+MUL16_16X8:	LD	D,L
+	LD	E,C
+	MLT	DE			; DE = L * C
+	LD	L,C
+	MLT	HL			; HL = H * C
+	LD	A,H
+	OR	A
+	JR	NZ,MUL16_OVF	; high byte of cross-term must be zero
+	LD	A,D
+	ADD	A,L
+	JR	C,MUL16_OVF
+	LD	H,A
+	LD	L,E
+	RET
+;
+; 8 x 16: HL = (L*C) + ((L*B) << 8)
+;
+MUL16_H0:	LD	D,L
+	LD	E,C
+	MLT	DE			; DE = L * C
+	LD	H,L
+	LD	L,B
+	MLT	HL			; HL = L * B
+	LD	A,H
+	OR	A
+	JR	NZ,MUL16_OVF	; high byte of cross-term must be zero
+	LD	A,D
+	ADD	A,L
+	JR	C,MUL16_OVF
+	LD	H,A
+	LD	L,E
+	RET
+;
+MUL16_OVF:	SCF
+	RET
+
 ;
 CHANEL:	CALL	NXT
 	CP	'#'

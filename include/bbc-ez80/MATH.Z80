@@ -367,14 +367,167 @@ FDIV:	DEC	B		;TEST FOR ZERO
 	SBC	A,B
 	CCF
 	JP	CHKOVF
+
+;
+; IMULM - hybrid integer multiply for IMUL (eZ80 MLT-assisted)
+;
+; Fast paths:
+;   - 8×8
+;   - 16×8
+;   - 8×16
+;
+; Slow path:
+;   - full 32×32 multiply via original MULA
+;
+; Entry (after ABS2):
+;   main BC = low  16 bits of operand X
+;   alt  BC = high 16 bits of operand X
+;   main DE = low  16 bits of operand Y
+;   alt  DE = high 16 bits of operand Y
+;
+; Fast-path condition:
+;   B'=C'=D'=E'=0  (both operands ≤ 16 bits)
+;
+; Exit (same layout as MULA):
+;   main DE = low  16 bits of product
+;   alt  DE = high 16 bits of product
+;   main HL = 0
+;   alt  HL = 0
+;
+; Notes:
+;   - Uses eZ80 MLT instruction for fast 8×8 multiplies
+;   - Keeps fallback to MULA for correctness on larger values
+;   - No scratch memory used
+;
+
+IMULM:	EXX
+	LD	A,B
+	OR	C
+	OR	D
+	OR	E
+	EXX
+	JR	NZ,IMULM_SLOW	; operands exceed 16 bits
+
+	LD	A,B
+	OR	A
+	JR	Z,IMULM_X8	; X fits in 8 bits
+
+	LD	A,D
+	OR	A
+	JR	Z,IMULM_16X8	; X is 16-bit, Y is 8-bit
+
+	JR	IMULM_SLOW	; both 16-bit -> use original path
+
+;
+; X fits in 8 bits
+;
+IMULM_X8:
+	LD	A,D
+	OR	A
+	JR	Z,IMULM_8X8	; both 8-bit
+
+	JR	IMULM_8X16	; X is 8-bit, Y is 16-bit
+
+;
+; 8×8 fast path
+;   X = C
+;   Y = E
+;
+IMULM_8X8:
+	LD	A,E
+	LD	D,C
+	LD	E,A
+	MLT	DE			; DE = C * E
+
+	LD	HL,0
+	EXX
+	LD	DE,0
+	LD	HL,0
+	EXX
+	XOR	A
+	RET
+
+;
+; 16×8 fast path
+;   X = 256*B + C
+;   Y = E
+;
+; product = (C*E) + ((B*E) << 8)
+;
+IMULM_16X8:
+	LD	A,E			; save Y
+
+	LD	D,C
+	LD	E,A
+	MLT	DE			; DE = C * Y
+
+	LD	C,A
+	MLT	BC			; BC = B * Y
+
+	LD	A,D
+	ADD	A,C
+	LD	D,A			; low word high byte
+
+	LD	A,0
+	ADC	A,B			; high word low byte
+
+	LD	HL,0
+	EXX
+	LD	E,A
+	LD	D,0
+	LD	HL,0
+	EXX
+	XOR	A
+	RET
+
+;
+; 8×16 fast path
+;   X = C
+;   Y = 256*D + E
+;
+; product = (C*E) + ((C*D) << 8)
+;
+IMULM_8X16:
+	LD	A,D			; save Y high
+
+	LD	D,C
+	MLT	DE			; DE = C * Ylow
+
+	LD	B,C
+	LD	C,A
+	MLT	BC			; BC = C * Yhigh
+
+	LD	A,D
+	ADD	A,C
+	LD	D,A			; low word high byte
+
+	LD	A,0
+	ADC	A,B			; high word low byte
+
+	LD	HL,0
+	EXX
+	LD	E,A
+	LD	D,0
+	LD	HL,0
+	EXX
+	XOR	A
+	RET
+
+;
+; Fallback: original multiply
+;
+IMULM_SLOW:
+	LD	A,-33
+	CALL	MULA
+	RET
+
 ;
 ;IMUL - Integer multiplication.
 ;
 IMUL:	LD	A,H
 	XOR	D
 	CALL	ABS2		;MAKE BOTH POSITIVE
-	LD	A,-33
-	CALL	MULA		;MULTIPLY
+  CALL  IMULM
 	EXX
 	LD	C,191		;PRESET EXPONENT
 	CALL	TEST		;TEST RANGE
