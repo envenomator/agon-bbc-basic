@@ -6,6 +6,10 @@
 ;
 ; Modinfo:
 
+.macro    LOG param
+  ; Empty macro to disable upstream logging
+.endm
+
 .macro		EXTRN  addr
 	XDEF	\addr
 .endm

@@ -42,33 +42,51 @@ AGON_START:
     LD          B, 0           ; C = argc
     LD          A, C			
     CP          2
-    JR          Z, AUTOLOAD	 	  ; 2 parameters = autoload
-    JR          C, STARTBASIC   ; 1 parameter (program name) = normal start
-    CALL        STAR_VERSION    ; Output the AGON version
+    JR          Z, AUTOLOAD	 	 ; 2 parameters = autoload
+    JR          C, STARTBASIC  ; 1 parameter (program name) = normal start
+    CALL        STAR_VERSION   ; Output the AGON version
     CALL        TELL
     .ascii      "Usage:\n\r"
     .asciz      "BBCBASIC <filename>\n\r"
     JR          AGON_END
 ;							
-AUTOLOAD:
-    LD          HL, (IX+3)  ; HLU: Address of filename
-    LD          DE, ACCS		;  DE: Destination address
-1:  LD          A, (HL)			; Fetch the filename byte
-    LD          (DE), A			; 
-    INC         HL			    ; Increase the source pointer
-    INC         E           ; We only need to increase E as ACCS is on a page boundary
+; Copies CHAIN prefix and filename to ACCS, sets boolean STARTUPCMD
+AUTOLOAD:                      
+    LD          DE, ACCS
+    LD          HL, CHAINTXT
+1:  LD          A, (HL)
     OR          A
-    JR          NZ, 1b      ; Loop until we hit a 0 byte
-    DEC         E
+    JR          Z, 1f
+    LD          (DE), A
+    INC         HL
+    INC         DE
+    JR          1b
+1:  LD          HL, (IX+3)     ; argv[1] filename argument
+1:  LD          A, (HL)
+    OR          A
+    JR          Z, 1f
+    LD          (DE), A
+    INC         HL
+    INC         E
+    JR          1b
+1:  LD          A, '"'         ; Add trailing quotes
+    LD          (DE), A
+    INC         E
     LD          A, CR
-    LD          (DE), A     ; Replace the 0 byte with a CR for BBC BASIC
+    LD          (DE), A
+    INC         E
+    XOR         A
+    LD          (DE), A        ; optional trailing NUL
+
+    LD          A, 1
+    LD          (STARTUPCMD), A
 ;
 STARTBASIC:
-    JP          START       ; Start BASIC
+    JP          START          ; Start BASIC
 
 ; Return safely to MOS (called from *BYE / QUIT)
 AGON_END:
-    LD          SP, (SP_EXIT) ; Restore stack pointer
+    LD          SP, (SP_EXIT)  ; Restore stack pointer
     LD          HL, 0          ; Make sure MOS doesn't show an error
     POP         IY
     POP         IX
@@ -225,3 +243,7 @@ SP_EXIT:
     .space      3 ; saved stack pointer
 _argv_ptrs:
     .space      ARGV_PTRS_MAX*3, 0 ; argv pointer storage
+CHAINTXT:
+    .ascii      "CHAIN "
+    .byte       34; '"'
+    .byte       0
