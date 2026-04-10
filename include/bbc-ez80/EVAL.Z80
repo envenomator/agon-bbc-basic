@@ -109,7 +109,6 @@
 ;
 	EXTRN	POINT
 	EXTRN	ADVAL
-	EXTRN	TINTFN
 	EXTRN	MODEFN
 	EXTRN	WIDFN
 ;
@@ -888,10 +887,6 @@ BADSUB:	LD	A,15
 ;COUNT - number of printing characters since CR.
 ;Results are integer numeric.
 ;
-;TINT:
-  ;JP  TINTFN
-  ;CALL	TINTFN
-	;JP	COUNT1
 POS:	CALL	GETCSR
 	EX	DE,HL
 	JP	COUNT1
