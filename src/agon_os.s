@@ -54,14 +54,13 @@
     .global     ORIGIN
     .global     RECTAN
     .global     LINE
-    .global     TINT
     .global     WAIT
     .global     SYS
     .global     CSRON
     .global     CSROFF
     .global     PUTIMS
     .global     GETIMS
-    .global     TINTFN
+    .global     TINT
     .global     MODEFN
     .global     WIDFN
     .global     STAR_VERSION
@@ -1924,8 +1923,6 @@ EEK:
     DEFB        15H ;'variable'
     DEFB        0
 ;
-TINT:
-TINTFN:
 SYS:
     XOR         A
     CALL        EXTERR
@@ -2339,6 +2336,47 @@ GETSCHR:
     XOR         A ; Clear carry
 1:
     POP         IX
+    RET
+
+;
+; TINT - var=TINT(x,y)
+;
+; Return 32bit integer as HLH'L'
+;
+TINT:
+    CALL    EXPRI
+    EXX
+    PUSH    HL
+    CALL    CEXPRI
+    EXX
+    POP    DE
+    CALL    BRAKET
+    ; Get pixel information
+    PUSH  IX ; Get the system vars in IX
+    LD    IX, (MOS_SYSVARS)
+    RES   2, (IX+sysvar_vdp_pflags)
+    VDU   23
+    VDU   0
+    VDU   vdp_scrpixel
+    VDU   E
+    VDU   D
+    VDU   L
+    VDU   H
+1:  BIT   2, (IX+sysvar_vdp_pflags)
+    JR    Z, 1b ; Wait for the result
+    LD    HL, SCRAP
+    ; return low bytes
+    LD    A,  (IX+sysvar_scrpixel+0) ; R
+    LD    L, A
+    LD    A,  (IX+sysvar_scrpixel+1) ; G
+    LD    H, A
+    EXX
+    ; return high bytes
+    LD    A,  (IX+sysvar_scrpixel+2) ; B
+    LD    L, A
+    XOR   A                          ; upper byte is always 0
+    LD    C, A                       ; Indicate this is an integer result
+    POP   IX	
     RET
 
 ; AGON_POINT(x,y): Get the pixel colour of a point on screen
