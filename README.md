@@ -9,7 +9,10 @@ Work in progress
 
 The following keywords are not yet supported:
 - SYS
-- TINT
+
+The following keywords are supported, but have not yet been implemented in the Agon VDP.
+- ELLIPSE
+- FILL / FILL BY
 
 ### Installation
 Copy the 'bbcbasic.bin' file to the /bin folder of your SD card.
