@@ -434,9 +434,7 @@ IMULM_X8:
 ;   Y = E
 ;
 IMULM_8X8:
-	LD	A,E
 	LD	D,C
-	LD	E,A
 	MLT	DE			; DE = C * E
 
 	LD	HL,0
