@@ -216,6 +216,6 @@ SKIP_SPACES:
 ;
 ; Storage
 ;
-    .section    .data
+    .section    .bss
 SP_EXIT:
     .space      3 ; saved stack pointer

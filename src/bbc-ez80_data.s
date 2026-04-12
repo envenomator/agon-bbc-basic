@@ -16,7 +16,7 @@
     .include    "equs.inc"
     .include    "macros.inc"
 
-    .section    .data
+    .section    .bss
 ;
 RAM_START:
 MOS_SYSVARS:
