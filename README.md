@@ -3,9 +3,7 @@
 A port of BBC Basic for Z80 by R.T.Russell.  Modified to run in eZ80/ADL mode on the Agon Platform.
 This port is targetting to be functionally compatible with BBC Basic V5 for the Z80 as per upstream repo https://github.com/rtrussell/BBCZ80
 
-### Status
-
-Work in progress
+### Status: work in progress
 
 The following keywords are not yet supported:
 - SYS
