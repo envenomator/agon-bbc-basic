@@ -1718,13 +1718,7 @@ CASE4:	BIT	0,B		;Numeric or string?
 	CALL	EXPRN
 	LD	IX,0
 	ADD	IX,SP		;Address stack
-	EXX
-	LD	E,(IX+0)	;Get LS 32-bits
-	LD	D,(IX+1)
-	EXX
-	LD	E,(IX+2)
-	LD	D,(IX+3)	;Get MS 32-bits
-	LD	B,(IX+4)	;Get exponent
+	CALL	DLOAD5_SPL
 	LD	A,9
 	CALL	FPP		;In case integer vs float
 	LD	A,L
