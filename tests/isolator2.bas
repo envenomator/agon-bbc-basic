@@ -1,0 +1,3 @@
+10 PRINT TRUE
+20 t=(0.5>0.1)
+30 PRINT t
