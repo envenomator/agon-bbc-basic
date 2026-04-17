@@ -12,6 +12,8 @@ The following keywords are supported, but have not yet been implemented in the A
 - ELLIPSE
 - FILL / FILL BY
 
+The built-in assembler hasn't been ported to ADL yet, so not functional at the moment
+
 ### Installation
 Copy the 'bbcbasic.bin' file to the /bin folder of your SD card.
 
