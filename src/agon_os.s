@@ -988,6 +988,72 @@ OSBYTE_A0:
     POP         IX
     JP          COUNT0
 
+; ------------------------------------------------------------
+; GET_NUMBER 
+;
+; Input:
+;   HL = pointer to 0-terminated C string
+;
+; Output on success:
+;   DE = parsed value
+;   Carry clear
+;
+; Output on failure:
+;   DE = 0
+;   Carry set
+;
+; Accepted:
+;   "0"
+;   "123"
+;   "   123"
+;   "123   "
+;   "   123   "
+;
+; Rejected:
+;   ""
+;   "   "
+;   "abc"
+;   "12abc"
+;   "&12"
+;   "-1"
+;   "+1"
+;
+; Notes:
+;   - decimal only
+;   - uses ASC_TO_NUMBER to do the conversion
+;   - assumes ASC_TO_NUMBER leaves A = first non-space char
+;     after the parsed number (via its final SKIPSP)
+; ------------------------------------------------------------
+
+GET_NUMBER:
+    PUSH    HL
+
+    CALL    SKIPSP       ; skip leading spaces
+    LD      A,(HL)
+    OR      A
+    JR      Z, NAN_      ; empty / spaces only
+
+    CP      '0'
+    JR      C, NAN_      ; first char < '0'
+    CP      '9'+1
+    JR      NC, NAN_     ; first char > '9'
+
+    POP     HL           ; restore original pointer for converter
+    CALL    ASC_TO_NUMBER
+
+    OR      A
+    JR      NZ, NAN_2    ; trailing junk after number
+
+    OR      A            ; clear carry
+    RET
+
+NAN_:
+    POP     HL
+NAN_2:
+    LD      DE,0
+    SCF
+    RET
+
 ; OSCLI
 ;
 ;
@@ -1054,6 +1120,13 @@ OSCLI6:
     CALL        CSTR_LINE ; Fetch the line
     POP         HL ; HL: Pointer to command string in ACCS
     PUSH        IY
+
+    CALL        GET_NUMBER        ; Check if only number given as *linenumber
+    JR          C, OSCLI_MOSCALL  ; If not, pass as cmd to MOS
+    JP          STAR_EDIT2 
+
+OSCLI_MOSCALL:
+
     MOSCALL     mos_oscli ; Returns OSCLI error in A
     POP         IY
     OR          A ; 0 means MOS returned OK
@@ -1110,6 +1183,7 @@ BYE:
 ;
 STAR_EDIT:
     CALL        ASC_TO_NUMBER ; DE: Line number to edit
+STAR_EDIT2:
     EX          DE, HL ; HL: Line number
     CALL        FINDL ; HL: Address in RAM of tokenised line
     LD          A, 41 ; F:NZ If the line is not found
