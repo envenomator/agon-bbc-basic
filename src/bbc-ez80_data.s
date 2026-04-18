@@ -12,6 +12,7 @@
     .global     RAM_START
     .global     RAM_END
     .global     conversion_store
+    .global     R0
 
     .include    "equs.inc"
     .include    "macros.inc"
@@ -44,6 +45,8 @@ SCRAP:
 ;
 conversion_store:
     .space      4 ; Scratch pad to convert integer representations
+R0:
+    .space      3 ; General purpose storage for 8/16 to 24 bit operations during assembly
 ;
     .balign     256
     .include    "bbc-ez80/DATA.Z80"

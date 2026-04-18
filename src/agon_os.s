@@ -1078,6 +1078,8 @@ UPPRC:
 ; These must be in alphabetical order
 ;        
 COMDS:
+    DB          'AS','M'+80h		; ASM
+    .d24        STAR_ASM
     DB          'BY','E'+80h ; BYE
     .d24        BYE
     DB          'EDI','T'+80h ; EDIT
@@ -1088,6 +1090,15 @@ COMDS:
     .d24        STAR_VERSION
     DB          0xFF
 
+; *ASM string
+;
+STAR_ASM:
+  PUSH	IY			; Stack the BASIC pointer
+  PUSH	HL			; HL = IY
+  POP	IY
+  CALL	ASSEM			; Invoke the assembler
+  POP	IY
+  RET
 ;
 ; *BYE/QUIT
 ;

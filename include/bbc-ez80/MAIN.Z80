@@ -163,7 +163,7 @@ COLD:	LD	HL,STAVAR	;COLD START
 PURGE:	LD	(HL),A		;CLEAR SCRATCHPAD
 	INC	L
 	JR	NZ,PURGE
-	LD	A,37H		;V3.0
+	LD	A,0xB7		; Set LISTO sysvar; the bottom nibble is LISTO (7), top nibble is OPT (B) / ADL default
 	LD	(LISTON),A
 	LD	HL,NOTICE
 	LD	(ERRTXT),HL
@@ -191,7 +191,7 @@ CLOOP:	SCF
 	LD	HL,LISTON
 	LD	A,(HL)
 	AND	0FH		;LISTO
-	OR	30H		;OPT 3
+	OR	0xB0		; Top nibble: Default to OPT (3) with ADL mode bit set to 1 for assemble
 	LD	(HL),A
 	SBC	HL,HL		;HL <- 0 (V3.0)
 	LD	(ERRTRP),HL
