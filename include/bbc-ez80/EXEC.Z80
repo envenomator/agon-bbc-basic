@@ -499,7 +499,7 @@ ASM:	LD	(CURLIN),IY
 	LD	HL,LISTON
 	LD	A,(HL)
 	AND	0FH
-	OR	0xB0 ; ADL Default 1
+	OR	0xB0  ; Set bit 7 to ADL=1 by default
 	LD	(HL),A
 	JR	XEQGO4
 ;
@@ -2077,67 +2077,108 @@ BPUTS0:	CALL	NXT
 	JR	NZ,BPUT1
 	INC	IY
 	JR	BPUTX
+; CALL address[,var[,var...]]
 ;
-;CALL address[,var[,var...]]
+; Note that the parameter table differs from the Z80 version
+; Each entry now takes up 4 bytes, not 3, so the table is now:
+;  -1 byte:  Number of parameters
+; Then, for each parameter:
+;  -1 byte:  Parameter type (00h: byte, 04h: word, 05h: real, 80h: fixed string, 81h: dynamic string)
+;  -3 bytes: Parameter address
 ;
-CALL:	CALL	EXPRI		;ADDRESS
-	EXX
-	PUSH	HL		;SAVE IT
-	LD	B,0		;PARAMETER COUNTER
-	LD	DE,BUFFER	;VECTOR
-CALL1:	CALL	NXT
-	CP	','
-	JR	NZ,CALL2
-	INC	IY
-	INC	B
-	CALL	NXT
-	PUSH	BC
-	PUSH	DE
-	CALL	VAR
-	POP	DE
-	POP	BC
-	INC	DE
-	LD	(DE),A		;PARAMETER TYPE
-	INC	DE
-	EX	DE,HL
-	LD	(HL),E		;PARAMETER ADDRESS
-	INC	HL
-	LD	(HL),D
-	EX	DE,HL
-	JR	CALL1
-CALL2:	LD	A,B
-	LD	(BUFFER),A	;PARAMETER COUNT
-	POP	HL		;RESTORE ADDRESS
-	CALL	USR1
-	JP	XEQ
+; See https://www.bbcbasic.co.uk/bbcbasic/mancpm/bbckey1.html#callparms for more information
 ;
-;USR(address)
+CALL:			CALL    EXPRI           	; Fetch the address
+			LD	A,L			;  A: MSB of address
+			EXX
+			LD	(R0+0),HL		; HL: LSW of address
+			LD	(R0+2),A		
+			LD      B,0             	;  B: The parameter counter
+			LD      DE,BUFFER       	; DE: Vector
 ;
-USR:	CALL	ITEMI
-	EXX
-USR1:	PUSH	HL		;ADDRESS ON STACK
-	EX	(SP),IY
-	INC	H		;PAGE &FF?
-	LD	HL,USR2		;RETURN ADDRESS
-	PUSH	HL
-	LD	IX,STAVAR
-	CALL	Z,OSCALL	;INTERCEPT PAGE &FF
-	LD	C,(IX+24)
-	PUSH	BC
-	POP	AF		;LOAD FLAGS
-	LD	A,(IX+4)	;LOAD Z80 REGISTERS
-	LD	B,(IX+8)
-	LD	C,(IX+12)
-	LD	D,(IX+16)
-	LD	E,(IX+20)
-	LD	H,(IX+32)
-	LD	L,(IX+48)
-	LD	IX,BUFFER
-	JP	(IY)		;OFF TO USER ROUTINE
-USR2:	POP	IY
-	XOR	A
-	LD	C,A
-	RET
+CALL1:			CALL    NXT			; Skip whitespace
+			CP      ','			; Check for comma
+			JR      NZ,CALL2		; If no more parameters, then jump here
+			INC     IY			; Skip to the next character
+			INC     B			; Increment the parameter count
+			CALL    NXT			; Skip whitespace
+			PUSH    BC
+			PUSH    DE
+			CALL    VAR
+			POP     DE
+			POP     BC
+			INC     DE
+			LD      (DE),A			; Save the parameter type
+			INC     DE
+			EX      DE,HL
+			LD	(HL),DE			; Save the parameter address (3 bytes)
+			INC	HL
+			INC	HL
+			INC	HL
+			EX      DE,HL
+			JR      CALL1
+;
+CALL2:			LD      A,B
+			LD      (BUFFER),A      	; Save the parameter count
+			LD	HL,(R0)			; HL: Address of the code
+			CALL    USR1			; And call it
+			JP      XEQ
+
+; USR(address)
+;
+USR:			CALL    ITEMI			; Evaluate the expression
+			LD	A,L			;  A: MSB of address
+			EXX
+			LD	(R0+0),HL		; HL: LSW of address
+			LD	(R0+2),A		
+			LD	HL,(R0)			; Get the 24-bit address in HL
+;
+USR1:			PUSH    HL              	; Address on stack
+			EX      (SP),IY
+			INC     H               	; Check for PAGE &00FFxx
+			OR	H
+			LD      HL,USR2         	; Return address
+			PUSH    HL
+			LD      IX,STAVAR
+			CALL    Z,OSCALL        	; Intercept &00FFxx
+;
+			LD      C, (IX+24)		; F%
+			PUSH    BC
+;
+			LD	A, (IX+8)		; B% -> MSW 
+			LD	(R0+1), A 		
+			LD	A, (IX+9)
+			LD	(R0+2), A 
+			LD	A, (IX+12)		; C% -> LSB 
+			LD	(R0+0), A 
+			LD	BC, (R0)
+;
+			LD	A, (IX+16)		; D% -> MSW 
+			LD	(R0+1), A 		
+			LD	A, (IX+17)
+			LD	(R0+2), A 
+			LD	A, (IX+20)		; E% -> LSB 
+			LD	(R0+0), A 
+			LD	DE, (R0)
+;
+			LD	A, (IX+32)		; H% -> MSW 
+			LD	(R0+1), A 		
+			LD	A, (IX+33)
+			LD	(R0+2), A 
+			LD	A, (IX+48)		; L% -> LSB 
+			LD	(R0+0), A 
+			LD	HL, (R0)
+;
+			POP     AF			; F%
+			LD      A, (IX+4)        	; A%
+
+			LD      IX,BUFFER
+			JP      (IY)            	; Off to user routine
+;
+USR2:			POP     IY	
+			XOR     A
+			LD      C,A
+			RET
 ;
 ; LEFT$(A$[,N]) = string
 ; MID$(A$,N[,M]) = string
