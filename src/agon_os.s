@@ -1316,10 +1316,50 @@ PRINTLINE:
     LD          HL, ACCS ; HL: ACCS
     PUSH        BC
     PUSH        DE
-    LD          BC,0
+    ; Check max column width for printing
+    LD          DE,0
+1:  LD          A,(HL)
+    INC         HL
+    INC         DE
+    OR          A
+    JR          NZ,1b
+    DEC         DE          ; DE = LINE length
+
+    PUSH        IX
+    LD          IX, (MOS_SYSVARS)
+    LD          A, (IX + sysvar_scrCols)
+    POP         IX
+    LD          HL,0
+    LD          L,A ; HL = number of columns on screen
+    LD          BC,4 ; account for spaces and linenumbers on screen
+    XOR         A
+    SBC         HL, BC ; HL = Maximum usable columns on screen, accounting for line#s and prompt
+    PUSH        HL
+
+    PUSH        HL
+    PUSH        DE
+    POP         HL            ; HL is now LINE length
+    POP         BC            ; BC is now max usable columns on screen
+    XOR         A
+    SBC         HL, BC
+    JR          C, fitting
+    JR          Z, fitting
+    PUSH        HL
+    POP         BC
+    POP         BC            ; BC is now max usable columns on screen
+    JR          1f
+
+fitting:
+    POP         HL  ; clean up stack
+    LD          BC, 0         ; no limit to numbers printed, determined by A in MOS call
+1:
+    ; Print the current line
+    LD          HL, ACCS
+    ;LD          BC,0
     LD          A,0
     RST.LIS     18h
-    
+
+
     LD          HL, printline_prompt
     LD          BC,0
     LD          A,0
