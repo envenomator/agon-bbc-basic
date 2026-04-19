@@ -1181,6 +1181,8 @@ SELECTLINE:
     jr          z, exit_select
     cp          a, 0x08 ; left arrow
     jr          z, exit_select
+    cp          a, 0x7f ; delete key
+    jr          z, exit_select
     cp          a, 'j' ; down key
     jr          z, checknext
     cp          a, 'J' ; down key
