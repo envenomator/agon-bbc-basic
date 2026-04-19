@@ -1123,7 +1123,7 @@ OSCLI6:
 
     CALL        GET_NUMBER        ; Check if only number given as *linenumber
     JR          C, OSCLI_MOSCALL  ; If not, pass as cmd to MOS
-    JP          STAR_EDIT2 
+    JP          SELECTLINE
 
 OSCLI_MOSCALL:
 
@@ -1162,6 +1162,289 @@ COMDS:
     DB          'VERSIO','N'+80h ; VERSION
     .d24        STAR_VERSION
     DB          0xFF
+
+SELECTLINE:
+    call        wipeline_prepare
+1:
+    ld          a, 0 ; cursor off
+    call        wipeline
+    push        de
+    EX          DE, HL ; HL: Line number
+    CALL        FINDL ; HL: Address in RAM of tokenised line
+    LD          A, 41 ; F:NZ If the line is not found
+    JP          NZ, ERROR ; Do error 41: No such line in that case
+
+    CALL        PRINTLINE
+    MOSCALL     mos_getkey
+    pop         de ; DE: line number
+    cp          a, 0x0d
+    jr          z, exit_select
+    cp          a, 0x08 ; left arrow
+    jr          z, exit_select
+    cp          a, 'j' ; down key
+    jr          z, checknext
+    cp          a, 'J' ; down key
+    jr          z, checknext
+    cp          a, 0x0a ; down arrow
+    jr          z, checknext
+    cp          a, 'k' ; up key
+    jr          z, checkprevious 
+    cp          a, 'K' ; up key
+    jr          z, checkprevious
+    cp          a, 0x0b ; up arrow
+    jr          z, checkprevious
+    cp          a, 0x1b ; escape
+    jr          z, cancel_select
+    jr          1b
+
+checkprevious:
+    push        de
+    call        PREVLINE
+    jr          nc, select_newline
+    jr          ignore_newline
+
+checknext:
+    push        de
+    call        NEXT_LINE_AFTER
+    jr          nc, select_newline
+    jr          ignore_newline
+    
+select_newline:
+    pop         af ; discard previous linenumber
+    jr          1b
+ignore_newline:
+    pop         de ; restore previous linenumber
+    ld          a, 7
+    rst.lis     10h ; beep
+    jr          SELECTLINE
+
+exit_select:
+    ld          a, 1 ; cursor on
+    call        wipeline
+    jp          STAR_EDIT2
+cancel_select:
+    ld          a, 1 ; cursor on
+    call        wipeline
+    jp          CLOOP
+
+; Prepares BUFFER with the requires VDU codes to wipe the entire line, according to the current # of text columns
+; After this call, only a RST.LIS 18h is required with HL set to BUFFER, BC/A to 0
+;
+wipeline_prepare:
+    push        de
+    push        bc
+    push        hl
+    push        ix
+    ld          ix, (MOS_SYSVARS)
+    LD          A, (IX + sysvar_scrCols)
+    DEC         A
+    ld          c, a
+    ld          hl, BUFFER
+
+    ld          a, 13 ; CR / Column 0
+    ld          (hl),a
+    inc         hl
+
+    ld          a, ' '
+1: ; fill BUFFER with scrCols-1 spaces
+    ld          (hl),a
+    inc         hl
+    dec         c
+    jr          nz, 1b
+
+    ld          a, 13 ; CR / Column 0
+    ld          (hl), a
+    inc         hl
+    ld          a, 0  ; terminate string
+    ld          (hl), a 
+    pop         ix
+    pop         hl
+    pop         bc
+    pop         de
+    ret
+
+; Wipes the entire current row line
+; Input: A - 0 set cursor OFF
+;            1 set cursor ON
+;
+wipeline:
+    push        de
+    push        bc
+    push        hl
+    cp          a,0
+    jr          nz, cur_on
+cur_off:
+    ld          hl, CUR_OFF
+    ld          bc,0
+    ld          a,0xff
+    rst.lis     18h
+    jr          1f
+cur_on:
+    ld          hl, CUR_ON
+    ld          bc,0
+    ld          a,0xff
+    rst.lis     18h
+1: 
+    ld          hl, BUFFER
+    ld          bc, 0
+    ld          a, 0 ; terminator
+    rst.lis     18h
+    pop         hl
+    pop         bc
+    pop         de
+    ret
+CUR_ON:         .byte 23,1,1,0xff
+CUR_OFF:        .byte 23,1,0,0xff
+
+PRINTLINE:
+    ; PRINT LINE FROM LINEPOINTER IN HL, terminate with special prompt indicating selection
+    INC         HL ; Skip the length byte
+    LD          E, (HL) ; Fetch the line number
+    INC         HL
+    LD          D, (HL)
+    INC         HL
+    LD          IX, ACCS ; Pointer to where the copy is to be stored
+    LD          (OSWRCHPT), IX
+    LD          IX, LISTON ; Pointer to LISTON variable in RAM
+    LD          A, (IX) ; Store that variable
+    PUSH        AF
+    LD          (IX), 09h ; Set to echo to buffer
+    CALL        LISTIT
+    POP         AF
+    LD          (IX), A ; Restore the original LISTON variable
+
+    LD          HL, ACCS ; HL: ACCS
+    PUSH        BC
+    PUSH        DE
+    LD          BC,0
+    LD          A,0
+    RST.LIS     18h
+    
+    LD          HL, printline_prompt
+    LD          BC,0
+    LD          A,0
+    RST.LIS     18h
+    POP         BC
+    POP         DE
+    RET
+printline_prompt: .asciz " <<"
+
+; ------------------------------------------------------------
+; PREVLINE
+;
+; Input:
+;   DE = valid existing line number
+;
+; Output on success:
+;   HL = address of previous line record
+;   DE = previous line number
+;   Carry clear
+;
+; Output if there is no previous line:
+;   Carry set
+;
+; Destroys:
+;   A,B,C,H,L,F
+; ------------------------------------------------------------
+
+PREVLINE:
+    PUSH    IX
+
+    LD      HL,(PAGE)          ; HL = current line record
+    LD      IX,0               ; IX = previous line record (0 = none yet)
+
+.prev_loop:
+    LD      A,(HL)             ; length byte
+    OR      A
+    JR      Z,.no_prev         ; hit end unexpectedly
+
+    PUSH    HL
+    INC     HL
+    LD      C,(HL)             ; current line number low
+    INC     HL
+    LD      B,(HL)             ; current line number high
+    POP     HL
+
+    LD      A,C
+    CP      E
+    JR      NZ,.not_this
+    LD      A,B
+    CP      D
+    JR      NZ,.not_this
+
+; found target line
+    LD      A,IXL
+    OR      IXH
+    JR      Z,.no_prev         ; target is first line
+
+    PUSH    IX
+    POP     HL                 ; HL = previous line record
+
+    INC     HL
+    LD      E,(HL)             ; previous line number low
+    INC     HL
+    LD      D,(HL)             ; previous line number high
+    DEC     HL
+    DEC     HL                 ; restore HL = previous line record start
+
+    POP     IX
+    OR      A                  ; clear carry
+    RET
+
+.not_this:
+    PUSH    HL
+    POP     IX                 ; save this as previous line
+
+    LD      C,(HL)             ; BC = record length
+    LD      B,0
+    ADD     HL,BC              ; advance to next line
+    JR      .prev_loop
+
+.no_prev:
+    POP     IX
+    SCF
+    RET
+; ------------------------------------------------------------
+; NEXT_LINE_AFTER
+;
+; Input:
+;   DE = line number
+;
+; Output on success:
+;   DE = next existing line number strictly greater than input
+;   HL = address of that line record
+;   Carry clear
+;
+; Output if there is no next line:
+;   Carry set
+; ------------------------------------------------------------
+
+NEXT_LINE_AFTER:
+    PUSH    AF
+
+    EX      DE,HL          ; HL = requested line
+    INC     HL             ; search for first line > original
+    CALL    FINDL          ; HL = first line >= (original+1)
+
+    LD      A,(HL)         ; line length
+    OR      A
+    JR      Z,.none        ; length 0 => end of program
+
+    INC     HL
+    LD      E,(HL)         ; next line number low
+    INC     HL
+    LD      D,(HL)         ; next line number high
+    DEC     HL
+    DEC     HL             ; restore HL = line record start
+
+    POP     AF
+    OR      A              ; clear carry
+    RET
+
+.none:
+    POP     AF
+    SCF
+    RET
 
 ; *ASM string
 ;
@@ -1206,6 +1489,7 @@ STAR_EDIT2:
     POP         AF
     LD          (IX), A ; Restore the original LISTON variable
     LD          HL, ACCS ; HL: ACCS
+STAR_EDIT3:
     LD          E, L ;  E: 0 - Don't clear the buffer; ACCS is on a page boundary so L is 0
     CALL        OSLINE1 ; Invoke the editor
     CALL        OSEDIT
