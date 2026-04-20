@@ -5,12 +5,7 @@ This port is targetting to be functionally compatible with BBC Basic V5 for the 
 
 ### Status: work in progress
 
-The following keywords are not yet supported:
-- SYS
-
-The following keywords are supported, but have not yet been implemented in the Agon VDP.
-- ELLIPSE
-- FILL / FILL BY
+See the issue list for functionality that isn't supported yet.
 
 ### Installation
 Copy the 'bbcbasic.bin' file to the /bin folder of your SD card.
