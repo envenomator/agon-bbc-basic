@@ -76,6 +76,7 @@ TFILL           .equ    03h
 ; For MOUSE
 TON             .equ    0EEh
 TOFF            .equ    087h
+TRECT           .equ    07h
 
     .text
 
@@ -2207,6 +2208,8 @@ MOUSE:
     JP          Z, mouse_off
     CP          TTO
     JP          Z, mouse_to
+    CP          TRECT
+    JP          Z, mouse_rect
 ; MOUSE x,y,b
     PUSH        IX
     LD          IX, (MOS_SYSVARS)
@@ -2296,12 +2299,17 @@ mouse_to:
     EXX                   ; HL = Y
     POP         DE        ; DE = X
      
+    ; Send VDU command
     LD          BC,0
     LD          A,0xFF
     PUSH        HL
+    PUSH        DE
     LD          HL, mouse_to_msg
     RST.LIS     18h
+    POP         DE
     POP         HL
+
+    ; Send (X,Y) coordinate
     VDU         E
     VDU         D
     VDU         L
@@ -2311,6 +2319,98 @@ mouse_to:
     JP          XEQ
 mouse_to_msg:
     .byte       23,0,89h,4,0xFF
+mouse_rect:
+    INC         IY
+    CALL        NXT
+    CP          TOFF
+    JR          Z,mouse_rect_off
+
+    PUSH        BC
+    PUSH        DE
+
+    CALL        EXPRI
+    EXX
+    PUSH        HL        ; X1
+    CALL        COMMA
+    CALL        EXPRI
+    EXX
+    PUSH        HL        ; Y1
+    CALL        COMMA
+    CALL        EXPRI
+    EXX
+    PUSH        HL        ; X2
+    CALL        COMMA
+    CALL        EXPRI
+    EXX
+    PUSH        HL        ; Y2
+
+    PUSH        BC
+    LD          HL, mouse_rect_msg
+    LD          BC, 0
+    LD          A, 0xFF
+    RST.LIS     18h
+    POP         BC
+
+    ; Change order of parameters
+    POP         HL ; Y2
+    POP         BC ; X2
+    POP         DE ; Y1
+    POP         AF ; X1
+    PUSH        HL ; Y2
+    PUSH        BC ; X2
+    PUSH        DE ; Y1
+    PUSH        AF ; X1
+
+    ; Push 4 parameters to VDU
+    LD          B, 4
+1:  POP         HL
+    VDU         L
+    VDU         H
+    DEC         B
+    JR          NZ, 1b
+
+    POP         DE
+    POP         BC
+    JP          XEQ
+mouse_rect_msg:
+    .byte       23,0,89h,5,0xFF ; 23,0,89h,5
+mouse_rect_off: ; set bounding box to (0,0 - Max X, Max Y)
+    PUSH        IX
+    PUSH        DE
+    PUSH        BC
+    LD          IX, (MOS_SYSVARS)
+    LD          A, (IX+sysvar_scrWidth)
+    LD          C, A
+    LD          A, (IX+sysvar_scrWidth+1)
+    LD          B, A
+    DEC         BC                          ; BC = max X
+    LD          A, (IX+sysvar_scrHeight)
+    LD          E, A
+    LD          A, (IX+sysvar_scrHeight+1)
+    LD          D, A
+    DEC         DE                          ; DE = max Y
+
+    PUSH        BC
+    PUSH        DE
+    LD          HL, mouse_rect_off_msg
+    LD          BC, 0
+    LD          A, 0xFF
+    RST.LIS     18h
+    POP         DE
+    POP         BC
+   
+    VDU         C
+    VDU         B ; max X
+    VDU         E
+    VDU         D ; max Y
+    
+
+    POP         BC
+    POP         DE
+    POP         IX
+    JP          XEQ
+mouse_rect_off_msg:
+    .byte       23,0,89h,5,0,0,0,0,0xFF ; 23,0,89h,5,X1,Y1
 ;
 ;WAIT [n]
 ;
