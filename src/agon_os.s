@@ -73,6 +73,9 @@
 TBY             .equ    0Fh
 TTO             .equ    0B8h
 TFILL           .equ    03h
+; For MOUSE
+TON             .equ    0EEh
+TOFF            .equ    087h
 
     .text
 
@@ -2190,19 +2193,40 @@ OUTLIN:
     JR          PLOT4B
 ;
 ;MOUSE x, y, b
+;MOUSE ON [n]
+;MOUSE OFF
+;MOUSE TO x, y
+;MOUSE RECTANGLE l,b,w,h
+;MOUSE RECTANGLE OFF
 ;
 MOUSE:
-    LD          A,128
-    LD          HL,9
-    CALL        OSBYTE
+    CALL        NXT
+    CP          TON
+    JR          Z, mouse_on
+    CP          TOFF
+    JP          Z, mouse_off
+    CP          TTO
+    JP          Z, mouse_to
+; MOUSE x,y,b
+    PUSH        IX
+    LD          IX, (MOS_SYSVARS)
+    LD          HL,0
+    LD          A, (IX+sysvar_mouseButtons)
+    LD          L,A
+    LD          A, (IX+sysvar_mouseButtons+1)
+    LD          H,A
     PUSH        HL
-    LD          A,128
-    LD          HL,8
-    CALL        OSBYTE
+    LD          HL,0
+    LD          A, (IX+sysvar_mouseY)
+    LD          L,A
+    LD          A, (IX+sysvar_mouseY+1)
+    LD          H,A
     PUSH        HL
-    LD          A,128
-    LD          HL,7
-    CALL        OSBYTE
+    LD          HL,0
+    LD          A, (IX+sysvar_mouseX)
+    LD          L,A
+    LD          A, (IX+sysvar_mouseX+1)
+    LD          H,A
     PUSH        HL
     CALL        VAR
     POP         HL
@@ -2217,14 +2241,82 @@ MOUSE:
     CALL        VAR
     POP         HL
     CALL        STOREI
+    POP         IX
 XEQGO2:
     JP          XEQ
+
+mouse_on:
+    INC         IY
+    LD          HL,0    ; Standard mouse pointer
+    CALL        TERMQ
+    JR          Z, 1f
+    CALL        EXPRI
+    EXX                 ; HL = [n] mouse pointer
+
+1:
+    PUSH        BC
+    PUSH        HL
+    LD          BC,0
+    LD          A, 0xFF
+    LD          HL, mouse_on_msg
+    RST.LIS     18h
+    LD          BC,0
+    LD          A, 0xFF
+    LD          HL, mouse_shape_msg
+    RST.LIS     18h
+    POP         HL ; mouse pointer
+    VDU         L
+    VDU         H
+    POP         BC
+    JP          XEQ
+mouse_on_msg:
+    .byte       23,0,89h,0,0xFF
+mouse_shape_msg:
+    .byte       23,0,89h,3,0xFF
+mouse_off:
+    INC         IY
+    PUSH        BC
+    LD          BC,0
+    LD          A, 0xFF
+    LD          HL, mouse_off_msg
+    RST.LIS     18h
+    POP         BC
+    JP          XEQ
+mouse_off_msg:
+    .byte       23,0,89h,1,0xFF
+mouse_to:
+    INC         IY
+    PUSH        BC
+    PUSH        DE
+    CALL        EXPRI
+    EXX
+    PUSH        HL        ; X
+    CALL        COMMA
+    CALL        EXPRI
+    EXX                   ; HL = Y
+    POP         DE        ; DE = X
+     
+    LD          BC,0
+    LD          A,0xFF
+    PUSH        HL
+    LD          HL, mouse_to_msg
+    RST.LIS     18h
+    POP         HL
+    VDU         E
+    VDU         D
+    VDU         L
+    VDU         H
+    POP         DE
+    POP         BC
+    JP          XEQ
+mouse_to_msg:
+    .byte       23,0,89h,4,0xFF
 ;
 ;WAIT [n]
 ;
 WAIT:
     CALL        TERMQ
-    JR          Z,XEQGO2
+    JP          Z,XEQGO2
     CALL        EXPRI
     EXX
     LD          B,H
@@ -2248,7 +2340,7 @@ WAIT1:
     EX          DE,HL
     POP         BC
     SBC         HL,BC
-    JR          NC,XEQGO2
+    JP          NC,XEQGO2
     EX          DE,HL
     LD          D,B
     LD          E,C
