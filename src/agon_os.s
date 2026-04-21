@@ -2445,30 +2445,52 @@ WAIT1:
     LD          D,B
     LD          E,C
     JP          WAIT1
+
+;OSCALL - Intercept page &FF calls and provide an alternative address
 ;
-;OSCALL - Trap call to FFxx
+;&FFF7:	OSCLI	Execute *command.
+;&FFF4:	OSBYTE	Various byte-wide functions.
+;&FFF1:	OSWORD	Various control block functions.
+;&FFEE:	OSWRCH	Write character to output stream.
+;&FFE7:	OSNEWL	Write NewLine to output stream.
+;&FFE3:	OSASCI	Write character or NewLine to output stream.
+;&FFE0:	OSRDCH	Wait for character from input stream.
+;&FFDD:	OSFILE	Perform actions on whole files or directories.
+;&FFDA:	OSARGS	Read and write information on open files or filing systems.
+;&FFD7:	OSBGET	Read a byte from an a channel.
+;&FFD4:	OSBPUT	Write a byte to a channel.
+;&FFD1:	OSGBPB	Read and write blocks of data.
+;&FFCE:	OSFIND	Open or close a file.
 ;
 OSCALL:
-    POP         HL ;DITCH RETURN ADDRESS
-    LD          HL,OSRET
-    PUSH        HL ;NEW RETURN ADDRESS
-    LD          A,(IX+4) ;A%
-    LD          E,(IX+20) ;E%
-    LD          H,(IX+100) ;Y%
-    LD          L,(IX+96) ;X%
-    JP          (IY)
-OSRET:
-    PUSH        AF
-    LD          A,L ;F  H  L  A
-    LD          L,H ;|  |  |  |
-    EXX ;|  |  |  |
-    POP         BC ;|  |  |  |
-    LD          H,A ;|  |  |  |
-    LD          L,B ;H  L  H' L'
-    LD          A,C
-    EXX
-    LD          H,A
-    RET
+  LD	HL, OSCALL_TABLE
+1:
+  LD	A, (HL)
+  INC	HL
+  CP	0xFF
+  RET	Z 
+  CP	A, IYL
+  JR	Z, 2f
+  RET	NC
+  INC	HL 
+  INC	HL 
+  INC	HL
+  JR	1b
+2:
+  LD	IY,(HL)
+  RET
+OSCALL_TABLE:
+  .byte 0xD4
+  .d24  OSBPUT
+  .byte 0xD7
+  .d24  OSBGET
+  .byte 0xEE
+  .d24  OSWRCH
+  .byte 0xF4
+  .d24  OSBYTE
+  .byte 0xF7
+  .d24  OSCLI
+  .byte 0xFF	
 ;
 VDU25:
     LD          B,25
