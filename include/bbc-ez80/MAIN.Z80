@@ -1758,12 +1758,21 @@ GETVA:	PUSH	HL
 	PUSH	BC
 	CALL	LOADN		;LEFT OPERAND
 	CALL	SFIX
+	LD	A,L
 	EXX
+	LD	(conversion_store+0),HL
+	LD	(conversion_store+2),A
+	LD	HL,(conversion_store)			; HL: 24-bit address of the variable in memory
 GETV0:	PUSH	HL
 	INC	IY
-	CALL	ITEMI24
-	POP	DE
-	POP	AF
+	CALL    ITEMI
+	LD	A,L			;  A: The MSB of the address
+	EXX
+	LD	(conversion_store+0),HL		; HL: The LSW of the address
+	LD	(conversion_store+2),A		; conversion_store: L'HL or the 24-bit address
+	POP     DE
+	POP     AF
+	LD	HL,(conversion_store)			; HL: L'HL
 	ADD	HL,DE
 	PUSH	HL
 	POP	IX
