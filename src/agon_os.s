@@ -2420,16 +2420,17 @@ WAIT:
     JP          XEQ
 1:
     CALL        EXPRI
+    PUSH        HL
     EXX
     LD          B,H
     LD          C,L
     PUSH        BC        ; GETIME clobbers B
     CALL        GETIME
     POP         BC
-    ADD         HL,BC
-    LD          BC,0
+    ADD.S       HL,BC     ; n low 16bit
+    POP         BC        ; n high 16bit
     EX          DE,HL
-    ADC         HL,BC
+    ADC.S       HL,BC
     EX          DE,HL
 WAIT1:
     CALL        TRAP
