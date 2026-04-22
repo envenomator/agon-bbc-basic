@@ -78,6 +78,9 @@ TON             .equ    0EEh
 TOFF            .equ    087h
 TRECT           .equ    07h
 
+; For JOYSTICK
+portC           .equ    0x9E
+portD           .equ    0xA2
     .text
 
 ;OSINIT - Initialise RAM mapping etc.
@@ -1745,12 +1748,100 @@ RETEXX:
 ;ADVAL - var=ADVAL(n)
 ;
 ADVAL:
-    CALL        ITEMI
+    CALL        EXPRI
     EXX
-    LD          A,128
-    CALL        OSBYTE
+    PUSH        HL
+    EXX
+    LD          HL,0
+    IN0         A,(portC)
+    CPL                     ; flip bits
+    LD          L,A
+    IN0         A,(portD)
+    CPL                     ; flip bits
+    LD          H,A         ; HL = 8bit portD + 8bit portC
+    POP         BC          ; C = n
+    LD          A,C
+    CP          0
+    JR          Z, joystick_firebuttons
+    CP          1
+    JR          Z, joystick_x1
+    CP          2
+    JR          Z, joystick_y1
+    CP          3
+    JR          Z, joystick_x2
+    CP          4
+    JR          Z, joystick_y2
+    CP          5
+    JR          Z, ADVAL_RET
+    ; ignore all other 'channels' - return 0
+    LD          HL,0
+ADVAL_RET:
+    EXX
+    LD          HL,0
     XOR         A
-    JP          RETEXX
+    LD          C,A
+    RET
+joystick_firebuttons:
+    LD          DE,0x100 ; virtual channel '1' finished ADC 'conversion' always
+    BIT         4,H   ; joy2 B1
+    JR          Z,1f
+    SET         1,E
+1:  BIT         5,H   ; joy1 B1
+    JR          Z,1f
+    SET         0,E
+1:  BIT         6,H   ; joy2 B2
+    JR          Z,1f
+    SET         3,E
+1:  BIT         7,H   ; joy1 B2
+    JR          Z,1f
+    SET         2,E
+1:  EX          DE, HL
+    JR          ADVAL_RET
+joystick_x1:
+    BIT         5,L       ; joy1 left
+    JR          Z,1f
+    LD          HL,0
+    JR          ADVAL_RET
+1:  BIT         7,L       ; joy1 right
+    JR          Z,1f
+    LD          HL,0xFFF0
+    JR          ADVAL_RET
+1:  LD          HL,0x8000
+    JR          ADVAL_RET
+joystick_y1:
+    BIT         3,L       ; joy1 down
+    JR          Z,1f
+    LD          HL,0
+    JR          ADVAL_RET
+1:  BIT         1,L       ; joy1 up
+    JR          Z,1f
+    LD          HL,0xFFF0
+    JR          ADVAL_RET
+1:  LD          HL,0x8000
+    JR          ADVAL_RET
+joystick_x2:
+    BIT         4,L       ; joy2 left
+    JR          Z,1f
+    LD          HL,0
+    JR          ADVAL_RET
+1:  BIT         6,L       ; joy2 right
+    JR          Z,1f
+    LD          HL,0xFFF0
+    JR          ADVAL_RET
+1:  LD          HL,0x8000
+    JR          ADVAL_RET
+joystick_y2:
+    BIT         2,L       ; joy2 down
+    JR          Z,1f
+    LD          HL,0
+    JR          ADVAL_RET
+1:  BIT         0,L       ; joy2 up
+    JR          Z,1f
+    LD          HL,0xFFF0
+    JP          ADVAL_RET
+1:  LD          HL,0x8000
+    JP          ADVAL_RET
+
 ;
 ;MODEFN - var=MODE
 ;
