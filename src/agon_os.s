@@ -1586,7 +1586,7 @@ WAIT_VBLANK:
 ;
 ;GETIME    - Read elapsed-time clock.
 ;        Outputs:  DEHL = elapsed time (centiseconds)
-;       Destroys: A,D,E,H,L,F
+;       Destroys: A,B,D,E,H,L,F
 ;
 GETIME:
     LD          A,1
@@ -2245,7 +2245,6 @@ MOUSE:
     POP         HL
     CALL        STOREI
     POP         IX
-XEQGO2:
     JP          XEQ
 
 mouse_on:
@@ -2416,12 +2415,17 @@ mouse_rect_off_msg:
 ;
 WAIT:
     CALL        TERMQ
-    JP          Z,XEQGO2
+    JP          NZ, 1f
+    CALL        WAIT_VBLANK
+    JP          XEQ
+1:
     CALL        EXPRI
     EXX
     LD          B,H
     LD          C,L
+    PUSH        BC        ; GETIME clobbers B
     CALL        GETIME
+    POP         BC
     ADD         HL,BC
     LD          BC,0
     EX          DE,HL
@@ -2434,13 +2438,13 @@ WAIT1:
     CALL        GETIME
     POP         BC
     OR          A
-    SBC         HL,BC
+    SBC.S       HL,BC
     LD          H,B
     LD          L,C
     EX          DE,HL
     POP         BC
-    SBC         HL,BC
-    JP          NC,XEQGO2
+    SBC.S       HL,BC
+    JP          NC,XEQ
     EX          DE,HL
     LD          D,B
     LD          E,C
