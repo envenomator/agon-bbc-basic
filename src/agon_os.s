@@ -1761,19 +1761,10 @@ ADVAL:
     LD          H,A         ; HL = 8bit portD + 8bit portC
     POP         BC          ; C = n
     LD          A,C
-    CP          0
-    JR          Z, joystick_firebuttons
-    CP          1
-    JR          Z, joystick_x1
-    CP          2
-    JR          Z, joystick_y1
-    CP          3
-    JR          Z, joystick_x2
-    CP          4
-    JR          Z, joystick_y2
     CP          5
     JR          Z, ADVAL_RET
-    ; ignore all other 'channels' - return 0
+    JR          C, 1f       ; n < 5
+    ;ignore all other 'channels' - return 0
     LD          HL,0
 ADVAL_RET:
     EXX
@@ -1781,6 +1772,10 @@ ADVAL_RET:
     XOR         A
     LD          C,A
     RET
+
+; n < 5
+1:  CP          0
+    JR          NZ, joystick_adc
 joystick_firebuttons:
     LD          DE,0x100 ; virtual channel '1' finished ADC 'conversion' always
     BIT         4,H   ; joy2 B1
@@ -1797,50 +1792,42 @@ joystick_firebuttons:
     SET         2,E
 1:  EX          DE, HL
     JR          ADVAL_RET
-joystick_x1:
-    BIT         5,L       ; joy1 left
-    JR          Z,1f
+
+joystick_adc:
+    LD          B,A        ; counter ch 1..4
+    PUSH        HL
+    LD          HL,joystick_adc_table
+1:  LD          E,(HL)
+    INC         HL
+    LD          D,(HL)
+    INC         HL
+    DJNZ        1b
+
+    POP         HL         ; HL = port bits
+    LD          C,E
+    LD          B,D        ; BC = table bits
+    EX          DE, HL     ; DE = port bits
     LD          HL,0
+    LD          A,E
+    AND         A,C
+    JR          NZ,ADVAL_RET ; down or left -> 0 ADC
+    LD          A,E
+    AND         A,B
+    JR          NZ,1f
+    LD          H,0x80      ; center -> 0x8000 ADC
     JR          ADVAL_RET
-1:  BIT         7,L       ; joy1 right
-    JR          Z,1f
-    LD          HL,0xFFF0
+1:  LD          HL,0xFFF0   ; up or right -> 65520 ADC
     JR          ADVAL_RET
-1:  LD          HL,0x8000
-    JR          ADVAL_RET
-joystick_y1:
-    BIT         3,L       ; joy1 down
-    JR          Z,1f
-    LD          HL,0
-    JR          ADVAL_RET
-1:  BIT         1,L       ; joy1 up
-    JR          Z,1f
-    LD          HL,0xFFF0
-    JR          ADVAL_RET
-1:  LD          HL,0x8000
-    JR          ADVAL_RET
-joystick_x2:
-    BIT         4,L       ; joy2 left
-    JR          Z,1f
-    LD          HL,0
-    JR          ADVAL_RET
-1:  BIT         6,L       ; joy2 right
-    JR          Z,1f
-    LD          HL,0xFFF0
-    JR          ADVAL_RET
-1:  LD          HL,0x8000
-    JR          ADVAL_RET
-joystick_y2:
-    BIT         2,L       ; joy2 down
-    JR          Z,1f
-    LD          HL,0
-    JR          ADVAL_RET
-1:  BIT         0,L       ; joy2 up
-    JR          Z,1f
-    LD          HL,0xFFF0
-    JP          ADVAL_RET
-1:  LD          HL,0x8000
-    JP          ADVAL_RET
+
+joystick_adc_table:
+    .byte       0b00100000 ; joy1 left    - ch1
+    .byte       0b10000000 ; joy1 right
+    .byte       0b00001000 ; joy1 down    - ch2
+    .byte       0b00000010 ; joy1 up
+    .byte       0b00010000 ; joy2 left    - ch3
+    .byte       0b01000000 ; joy2 right
+    .byte       0b00000100 ; joy2 down    - ch4
+    .byte       0b00000001 ; joy2 up
 
 ;
 ;MODEFN - var=MODE
