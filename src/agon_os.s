@@ -96,7 +96,7 @@ OSINIT:
     CALL        VBLANK_INIT
     XOR         A
     LD          (FLAGS), A ; Clear flags and set F = Z
-    LD          HL, USER
+    LD          HL, DATA_END
     LD          DE, RAM_TOP
     LD          E, A ; Page boundary
     LD          A, (ACCS) ; Return NZ if there is a file to chain

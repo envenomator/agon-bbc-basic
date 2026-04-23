@@ -125,9 +125,9 @@ CLEAR_RAM:
     PUSH        DE
     PUSH        BC
 
-    LD          HL, RAM_START
-    LD          DE, RAM_START + 1
-    LD          BC, RAM_SIZE
+    LD          HL, DATA_START
+    LD          DE, DATA_START + 1
+    LD          BC, DATA_SIZE
     XOR         A
     LD          (HL), A
     LDIR

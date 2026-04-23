@@ -9,8 +9,8 @@
     .global     KEYASCII
     .global     KEYCOUNT
     .global     SCRAP
-    .global     RAM_START
-    .global     RAM_END
+    .global     DATA_START
+    .global     DATA_END
     .global     conversion_store
     .global     R0
     .global     STARTUPCMD
@@ -20,7 +20,7 @@
 
     .section    .bss
 ;
-RAM_START:
+DATA_START:
 MOS_SYSVARS:
     .space      3 ; Storage for *mos_sysvars
 FLAGS:
@@ -57,4 +57,4 @@ SPL:
 ;
     .balign     256
     .include    "bbc-ez80/DATA.Z80"
-RAM_END:
+DATA_END:
