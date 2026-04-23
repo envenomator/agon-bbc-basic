@@ -64,6 +64,7 @@
     .global     MODEFN
     .global     WIDFN
     .global     STAR_VERSION
+    .global     CLS
 
     .include    "macros.inc"
     .include    "mos.inc"
@@ -101,6 +102,11 @@ OSINIT:
     LD          A, (ACCS) ; Return NZ if there is a file to chain
     OR          A
     RET
+
+CLS:	CALL	CLRSCN
+	XOR	A
+	LD	(COUNT),A
+	JP	XEQ
 
 ; PROMPT: output the input prompt
 ;

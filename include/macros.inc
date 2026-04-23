@@ -59,6 +59,46 @@
     POP BC
 .endm
 
+; convert H'L'HL to uHL
+; processed as unsigned int
+;
+.macro	CONVERT_U32_TO_U24
+	LD	A, L
+	EXX
+	LD	(conversion_store), HL
+	LD	(conversion_store + 2), A
+	LD	HL, (conversion_store)
+.endm
+
+.macro	TST_HL_IS_ZERO
+	PUSH	DE
+
+	XOR	A		; ASSIGN DE TO 0
+	EX	HL, DE
+	SBC	HL, HL
+	EX	HL, DE
+
+	SBC	HL, DE
+	ADD	HL, DE
+	POP	DE
+.endm
+
+.macro	TST_DE_IS_ZERO
+	PUSH	HL
+	XOR	A
+	SBC	HL, HL
+	SBC	HL, DE
+	POP	HL
+.endm
+
+.macro	TST_BC_IS_ZERO
+	PUSH	HL
+	XOR	A
+	SBC	HL, HL
+	SBC	HL, BC
+	POP	HL
+.endm
+
 ; Macro for calling the API
 ; Parameters:
 ; - function: One of the function numbers listed above

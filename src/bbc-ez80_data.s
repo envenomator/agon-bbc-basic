@@ -13,7 +13,8 @@
     .global     RAM_END
     .global     conversion_store
     .global     R0
-
+    .global     STARTUPCMD
+    .global     SPL
     .include    "equs.inc"
     .include    "macros.inc"
 
@@ -47,6 +48,12 @@ conversion_store:
     .space      4 ; Scratch pad to convert integer representations
 R0:
     .space      3 ; General purpose storage for 8/16 to 24 bit operations during assembly
+STARTUPCMD:
+    .space      1  ;Boolean used to check/skip autostart upon program load
+SPL:
+    .space      3  ; STORES THE SYSTEM BASE SPL ENTRY
+				           ; STACK CAN BE RELOADED FROM THIS TO CLEAR IT
+
 ;
     .balign     256
     .include    "bbc-ez80/DATA.Z80"

@@ -434,7 +434,9 @@ IMULM_X8:
 ;   Y = E
 ;
 IMULM_8X8:
+	LD	A,E
 	LD	D,C
+	LD	E,A
 	MLT	DE			; DE = C * E
 
 	LD	HL,0
@@ -516,8 +518,7 @@ IMULM_8X16:
 ;
 IMULM_SLOW:
 	LD	A,-33
-	CALL	MULA
-	RET
+	JP	MULA
 
 ;
 ;IMUL - Integer multiplication.
@@ -525,7 +526,7 @@ IMULM_SLOW:
 IMUL:	LD	A,H
 	XOR	D
 	CALL	ABS2		;MAKE BOTH POSITIVE
-  CALL  IMULM
+	CALL	IMULM
 	EXX
 	LD	C,191		;PRESET EXPONENT
 	CALL	TEST		;TEST RANGE
@@ -1712,7 +1713,7 @@ FIX:	EX	AF,AF'
 FIX1:	CALL	DIV2
 	CP	C
 	RET	Z
-	JP	NC,FIX1
+	JR	NC,FIX1
 	JP	OFLOW
 ;
 ;SFIX - Convert to integer if necessary.
@@ -1849,7 +1850,7 @@ FLO48:	BIT	7,H
 	EXX
 	ADC.S   HL,HL
 	DEC	C
-	JP	NZ,FLO48
+	JR	NZ,FLO48
 	RET
 ;
 ;Float unsigned number
@@ -1863,7 +1864,7 @@ FLOAT:	BIT	7,H
 	EXX			;REGION
 	ADC.S   HL,HL		;(BENCHMARKS)
 	DEC	C
-        JP      NZ,FLOAT
+        JR      NZ,FLOAT
 	RET
 ;
 ;SFLOAT - Convert to floating-point if necessary.
@@ -2271,7 +2272,7 @@ DIVB:
 	SBC.S   HL,BC
 	EXX
 	SCF
-	JP	DIVC
+	JR	DIVC
 ;
 ;MULA, MULB - MULTIPLICATION PRIMITIVE.
 ;    Function: H'L'HLD'E'DE = B'C'BC * D'E'DE
@@ -2299,7 +2300,7 @@ MULB:	EXX
 	EXX
 	RR	H
 	RR	L
-	JP	MUL0
+	JR	MUL0
 ;
 ;SQRA, SQRB - SQUARE ROOT PRIMITIVES
 ;    Function: B'C'BC = SQR (D'E'DE)
@@ -2331,14 +2332,14 @@ SQRA:	SLA	C
 	CALL	SLA8
 	CALL	SLA8
 	EXX
-	JP	NC,SQR1
+	JR	NC,SQR1
 SQR3:	OR	A
 	SBC.S   HL,BC
 	EXX
 	SBC.S   HL,BC
 	EXX
 	INC	C
-	JP	SQR2
+	JR	SQR2
 ;
 SQRB:
 	ADD.S   HL,HL
