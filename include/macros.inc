@@ -9,7 +9,6 @@
 	XDEF	\addr
 .endm
 
-
 .macro PTR	addr
 	d24	\addr
 .endm
@@ -40,23 +39,6 @@
 .macro VDU VAL
     LD A, \VAL
     CALL OSWRCH
-.endm
-
-.macro SET_GPIO REG, VAL
-    IN0 A,(\REG)
-    OR \VAL
-    OUT0 (\REG),A
-.endm
-
-.macro RES_GPIO REG, VAL
-    PUSH BC
-    LD A, \VAL
-    CPL
-    LD C, A
-    IN0 A,(\REG)
-    AND C
-    OUT0 (\REG),A
-    POP BC
 .endm
 
 ; convert H'L'HL to uHL
