@@ -8,10 +8,25 @@
     .global     ITEMI24
     .global     TRUE
     .global     CONVERT_TO_I24
+    .global     DLOAD5_SPL
 
     .include    "equs.inc"
     .include    "macros.inc"
     .text
+
+; THIS FUNCTION REPLACES DLOAD5 FOR WHEN IX POINTS TO A STACK FRAME
+; CONTAINING 'PUSHED REGISTERS'.
+
+; AS REGISTERS ARE NOW 3 BYTES LONG THE OFFSETS FOR EACH BYTE NEEDS
+; TO BE ADJUSTED
+
+DLOAD5_SPL:
+	LD      B,(IX+6)
+	EXX
+	LD	DE, (IX+0)
+	EXX
+	LD	DE, (IX+3)
+	RET
 
 EXPR_24BIT_INT:
     CALL        EXPRI ; RESULT IN HLH'L' C SHOULD BE ZERO

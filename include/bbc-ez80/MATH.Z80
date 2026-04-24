@@ -35,6 +35,7 @@ EXPRNG	EQU	24		;Exp range
 	GLOBAL	FPP
 	EXTRN	STORE5
 	EXTRN	DLOAD5
+	EXTRN	TEST
 ;
 ;Call entry and despatch code:
 ;
@@ -633,7 +634,7 @@ IPOW2:	POP	AF
 	PUSH	DE
 	CALL	SFLOAT
 	CALL	RECIP
-	CALL	STORE5_SPL ; Sparse stack layout
+	CALL	STORE5_SPL	; Sparse stack layout
 	JR	IPOW5
 ;
 IPOW3:	PUSH	BC
@@ -1959,18 +1960,6 @@ FTEST:	CALL	TEST
 	LD	A,H
 	AND	10000000B
 	OR	01000000B
-	RET
-;
-;TEST - Test HLH'L' for zero.
-;    Output: Z-flag set & A=0 if HLH'L'=0
-;    Destroys: A,F
-;
-TEST:	LD	A,H
-	OR	L
-	EXX
-	OR	H
-	OR	L
-	EXX
 	RET
 ;
 ;FCOMP - Compare two numbers

@@ -1816,7 +1816,8 @@ GETDEF:	LD	A,(IY+1)
 ;
 LOCATE:	SUB	'@'
 	RET	C
-	LD	HL,0
+	OR	A
+	SBC	HL, HL
 	CP	'Z'-'@'+1
 	JR	NC,LOC0		;NOT STATIC
 	LD	L,A
