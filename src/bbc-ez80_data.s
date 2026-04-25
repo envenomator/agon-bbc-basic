@@ -15,7 +15,6 @@
     .global     R0
     .global     STARTUPCMD
     .global     SPL
-    .global     SP_EXIT
 
     .include    "equs.inc"
     .include    "macros.inc"
@@ -58,6 +57,4 @@ STARTUPCMD:
 SPL:
     .space      3  ; STORES THE SYSTEM BASE SPL ENTRY
 				           ; STACK CAN BE RELOADED FROM THIS TO CLEAR IT
-SP_EXIT:
-    .space      3  ; saved INIT stack pointer
 

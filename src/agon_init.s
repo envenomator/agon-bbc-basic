@@ -21,6 +21,8 @@ chain_start:
     .asciz      "CHAIN  \x22"   ; Begin part of chain string
 chain_end:
     .byte       0x22,0x0d,0     ; End part of chain string
+SP_EXIT:
+    .space      3               ; saved INIT stack pointer
     .balign     64
     .ascii      "MOS"           ; MOS signature
     .byte       0x00            ; Header version
