@@ -1,10 +1,6 @@
 # Project name
 NAME = bbcbasic
 
-# Memory layout
-AGON_RAM_START = 0x40000
-AGON_RAM_SIZE  = 0x70000
-
 # Emulator SDcard destination defaults to /bin if not set by the user
 FAE_DEST ?= /bin
 
@@ -31,8 +27,7 @@ ASM=ez80-none-elf-as
 ASMFLAGS=-march=$(ARCH) -I $(INCLUDEDIR)
 ## Linker
 LINKER=ez80-none-elf-ld
-MEMCONFIG=-defsym=AGON_RAM_START=$(AGON_RAM_START) -defsym=AGON_RAM_SIZE=$(AGON_RAM_SIZE)
-LINKERFLAGS=$(MEMCONFIG) $(LINKER_ARG) $(LINKER_EXIT) -Map=$(BINDIR)/$(NAME).map -T $(LINKERCONFIG) --oformat binary -o 
+LINKERFLAGS=$(LINKER_ARG) $(LINKER_EXIT) -Map=$(BINDIR)/$(NAME).map -T $(LINKERCONFIG) --oformat binary -o 
 
 # Final binary
 BINARY=$(BINDIR)/$(NAME).bin

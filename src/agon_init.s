@@ -125,9 +125,9 @@ CLEAR_RAM:
     PUSH        DE
     PUSH        BC
 
-    LD          HL, DATA_START
-    LD          DE, DATA_START + 1
-    LD          BC, DATA_SIZE
+    LD          HL, bss_start
+    LD          DE, bss_start + 1
+    LD          BC, bss_size
     XOR         A
     LD          (HL), A
     LDIR
@@ -213,9 +213,3 @@ SKIP_SPACES:
     INC         HL
     JR          SKIP_SPACES
 
-;
-; Storage
-;
-    .section    .bss
-SP_EXIT:
-    .space      3 ; saved stack pointer

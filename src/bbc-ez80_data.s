@@ -15,12 +15,17 @@
     .global     R0
     .global     STARTUPCMD
     .global     SPL
+    .global     SP_EXIT
+
     .include    "equs.inc"
     .include    "macros.inc"
 
+    .section    .bss-1st
+    .balign     256
+    .include    "bbc-ez80/DATA.Z80"
+
     .section    .bss
-;
-DATA_START:
+
 MOS_SYSVARS:
     .space      3 ; Storage for *mos_sysvars
 FLAGS:
@@ -53,8 +58,6 @@ STARTUPCMD:
 SPL:
     .space      3  ; STORES THE SYSTEM BASE SPL ENTRY
 				           ; STACK CAN BE RELOADED FROM THIS TO CLEAR IT
+SP_EXIT:
+    .space      3  ; saved INIT stack pointer
 
-;
-    .balign     256
-    .include    "bbc-ez80/DATA.Z80"
-DATA_END:
