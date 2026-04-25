@@ -38,7 +38,7 @@
 
 .macro VDU VAL
     LD A, \VAL
-    CALL OSWRCH
+    RST.LIL 0x10
 .endm
 
 ; convert H'L'HL to uHL
