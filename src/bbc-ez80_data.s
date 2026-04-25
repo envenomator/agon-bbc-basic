@@ -15,6 +15,7 @@
     .global     R0
     .global     STARTUPCMD
     .global     SPL
+    .global     USER
 
     .include    "equs.inc"
     .include    "macros.inc"
@@ -58,3 +59,6 @@ SPL:
     .space      3  ; STORES THE SYSTEM BASE SPL ENTRY
 				           ; STACK CAN BE RELOADED FROM THIS TO CLEAR IT
 
+  .section .bss-end
+  .balign 256
+USER:
