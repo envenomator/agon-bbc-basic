@@ -1544,27 +1544,50 @@ STAR_VERSION:
     .asciz      "AGON eZ80/ADL release v0.4\n\r"
     RET
 
-; OSCLI FX n
+; OSCLI FX n [,value]
+; *FX n [,value]
 ;
 STAR_FX:
     CALL        ASC_TO_NUMBER
     LD          C, E                                    ; C: Save FX #
-    CALL        ASC_TO_NUMBER
-    LD          A, D                                    ; Is first parameter > 255?
-    OR          A
-    JR          Z, STAR_FX1                             ; Yes, so skip next bit
-    EX          DE, HL                                  ; Parameter is 16-bit
-    JR          STAR_FX2
-;
-STAR_FX1:
-    LD          B, E                                    ; B: Save First parameter
-    CALL        ASC_TO_NUMBER                           ; Fetch second parameter
-    LD          L, B                                    ; L: First parameter
-    LD          H, E                                    ; H: Second parameter
-;
-STAR_FX2:
+    CP          0x0d                                    ; ending terminator from ASC_TO_NUMBER
+    JR          NZ, 1f
+    LD          HL,0                                    ; no parameter
+    JR          star_end
+1:  CALL        readcomma
+    CALL        SKIPSP                                  ; Skip spaces
+    CALL        checknumber
+    CALL        ASC_TO_NUMBER                           ; parameter
+    CP          0x0d
+    JP          NZ, SYNTAX
+    PUSH        DE
+    POP         HL
+star_end:
     LD          A, C                                    ; A: FX #
-    JP          OSBYTE
+    JP          OSBYTE                                  ; HL: single parameter
+
+; destroys A
+; increments HL to position after the comma
+; Jumps to Syntax error if no comma found
+readcomma:
+    LD          A,(HL)
+    CP          0x0d
+    JP          Z, SYNTAX
+    CP          ','                                     ; read next parameter if comma found
+    INC         HL
+    RET         Z
+    JR          readcomma
+
+; INPUT: character in A
+; Jumps immediately to Syntax error if anything but '&' or '0' - '9'
+checknumber:
+    CP          '&'
+    RET         Z
+    CP          '0'
+    JP          C, SYNTAX
+    CP          '9' + 1
+    JP          NC, SYNTAX
+    RET
 
 ; Helper Functions
 ;
