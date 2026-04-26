@@ -818,8 +818,6 @@ OSBYTE:
     JP          Z, OSBYTE_81
     CP          0x86                                    ; Get cursor coordinates
     JP          Z, OSBYTE_86
-    CP          0x87                                    ; Fetch current mode and character under cursor
-    JP          Z, OSBYTE_87
     CP          0xA0                                    ; Fetch system variable
     JP          Z, OSBYTE_A0
 ;
@@ -971,18 +969,6 @@ OSBYTE_86:
     LD          H, (IX + sysvar_cursorY)
     POP         IX
     RET
-
-; OSBYTE 0x87: Fetch current mode and character under cursor
-;
-OSBYTE_87:
-    PUSH        IX
-    CALL        GETCSR                                  ; Get the current screen position
-    CALL        GETSCHR                                 ; Read character from screen
-    LD          L, A
-    LD          IX, (MOS_SYSVARS)
-    LD          H, (IX+sysvar_scrMode)                  ; H: Screen mode
-    POP         IX
-    JP          COUNT1
 
 ; OSBYTE 0xA0: Fetch system variable
 ; Parameters:
@@ -1832,20 +1818,22 @@ joystick_adc_table:
 ;MODEFN - var=MODE
 ;
 MODEFN:
-    LD          A,135
-    CALL        OSBYTE
-    LD          L,H
-RETU8:
-    XOR         A
-    LD          H,A
-    JP          RETEXX
+    LD          HL,0
+    PUSH        IX
+    LD          IX, (MOS_SYSVARS)
+    LD          L, (IX+sysvar_scrMode)                  ; L: Screen mode
+    POP         IX
+    JP          COUNT1                                  ; Just return the lower HL using shared function
 ;
 ;WIDFN - var=WIDTH
 ;
 WIDFN:
+    LD          HL,0
     LD          A,(WIDTH)
     LD          L,A
-    JR          RETU8
+    XOR         A
+    LD          H,A
+    JP          COUNT1                                  ; Just return the lower HL using shared function
 ;
 ;ENVEL - ENVELOPE var,var,var,var,var,var,var,
 ;                 var,var,var,var,var,var,var
