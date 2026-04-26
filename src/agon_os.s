@@ -4,66 +4,63 @@
 
     .assume     ADL = 1
 
+    .global     ADVAL
     .global     BYE
-    .global     WAIT
-    .global     OSWORD
-    .global     OSBYTE
-    .global     OSINIT
-    .global     OSOPEN
-    .global     OSSHUT
-    .global     OSLOAD
-    .global     OSSAVE
-    .global     OSLINE
-    .global     OSSTAT
-    .global     OSWRCH
-    .global     OSRDCH
+    .global     CIRCLE
+    .global     CLG
+    .global     CLS
+    .global     COLOUR
+    .global     CSROFF
+    .global     CSRON
+    .global     DRAW
+    .global     ELLIPS
+    .global     ENVEL
+    .global     ESCSET
+    .global     FILL
+    .global     GCOL
+    .global     GETCSR
+    .global     GETEXT
+    .global     GETIME
+    .global     GETIMS
+    .global     GETPTR
+    .global     LINE
+    .global     LTRAP
+    .global     MODE
+    .global     MODEFN
+    .global     MOUSE
+    .global     MOVE
+    .global     ORIGIN
     .global     OSBGET
     .global     OSBPUT
+    .global     OSBYTE
     .global     OSCLI
-    .global     PROMPT
-    .global     GETPTR
-    .global     PUTPTR
-    .global     GETEXT
-    .global     TRAP
-    .global     LTRAP
-    .global     BYE
-    .global     RESET
-    .global     ESCSET
     .global     OSCALL
-    .global     PUTCSR
-    .global     GETCSR
-    .global     PUTIME
-    .global     GETIME
+    .global     OSINIT
     .global     OSKEY
-    .global     CLG
-    .global     MOVE
-    .global     DRAW
+    .global     OSLOAD
+    .global     OSLINE
+    .global     OSOPEN
+    .global     OSRDCH
+    .global     OSSAVE
+    .global     OSSTAT
+    .global     OSSHUT
+    .global     OSWORD
+    .global     OSWRCH
     .global     PLOT
-    .global     MODE
-    .global     COLOUR
-    .global     GCOL
-    .global     ADVAL
-    .global     SOUND
-    .global     ENVEL
     .global     POINT
-    .global     CIRCLE
-    .global     ELLIPS
-    .global     FILL
-    .global     MOUSE
-    .global     ORIGIN
-    .global     RECTAN
-    .global     LINE
-    .global     WAIT
-    .global     SYS
-    .global     CSRON
-    .global     CSROFF
+    .global     PROMPT
+    .global     PUTCSR
+    .global     PUTIME
     .global     PUTIMS
-    .global     GETIMS
-    .global     TINT
-    .global     MODEFN
-    .global     WIDFN
+    .global     PUTPTR
+    .global     RECTAN
+    .global     SOUND
     .global     STAR_VERSION
-    .global     CLS
+    .global     SYS
+    .global     TINT
+    .global     TRAP
+    .global     WAIT
+    .global     WIDFN
 
     .include    "macros.inc"
     .include    "mos.inc"
@@ -267,11 +264,6 @@ LTRAP1:
     LD          HL,FLAGS                                ; Escape is pressed at this point, so
     RES         7,(HL)                                  ; Clear the escape pressed flag and
     JP          ESCAPE                                  ; Jump to the ESCAPE error routine in exec.asm
-
-; RESET
-;
-RESET:
-    RET                                                 ; Yes this is fine
 
 ; OSOPEN
 ; HL: Pointer to path
