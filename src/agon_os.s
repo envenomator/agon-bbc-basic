@@ -105,8 +105,7 @@ OSINIT:
 ;         Destroys: A,D,E,H,L,F
 ;
 CLS:
-    LD          A,0x0C
-    CALL        OSWRCH
+    VDU         0x0C
     XOR         A
     LD          (COUNT),A
     JP          XEQ
@@ -1701,12 +1700,10 @@ OSKEY:
 ;       Destroys: A,D,E,H,L,F
 ;
 PUTCSR:
-    LD          A,1FH
-    CALL        OSWRCH
-    LD          A,E
-    CALL        OSWRCH
-    LD          A,L
-    JP          OSWRCH
+    VDU         0x1F
+    VDU         E
+    VDU         L
+    RET
 ;
 ;GETCSR    - Return cursor coordinates.
 ;         Outputs:  DE = X coordinate (POS)
@@ -1939,8 +1936,7 @@ MODE:
 ;CLG
 ;
 CLG:
-    LD          A,16
-    CALL        OSWRCH
+    VDU         16
     JP          XEQGO1
 ;
 ;ORIGIN x,y
@@ -2032,25 +2028,19 @@ XEQGO1:
 ;CSRON  - Turn caret on
 ;CSROFF - Turn caret off
 ;
+
 CSRON:
-    LD          C,1
-    JR          CSRGO
-;
+    VDU   23
+    VDU   1
+    VDU   1
+    JR    XEQGO1
+
 CSROFF:
-    LD          C,0
-CSRGO:
-    LD          A,23
-    CALL        OSWRCH
-    LD          A,1
-    CALL        OSWRCH
-    LD          A,C
-    LD          B,8
-CSRGO1:
-    CALL        OSWRCH
-    XOR         A
-    DJNZ        CSRGO1
-    JR          XEQGO1
-;
+    VDU   23
+    VDU   1
+    VDU   0
+    JR    XEQGO1
+
 ;LINE x1,y1,x2,y2
 ;
 LINE:
@@ -2585,25 +2575,21 @@ OSCALL_TABLE:
     .d24        OSCLI
     .byte       0xFF
 ;
+
 VDU25:
     LD          B,25
 WRCH6:
-    LD          A,B
-    CALL        OSWRCH
+    VDU         B
 WRCH5:
-    LD          A,C
-    CALL        OSWRCH
+    VDU         C
 WRCH4:
-    LD          A,E
-    CALL        OSWRCH
+    VDU         E
 WRCH3:
-    LD          A,D
-    CALL        OSWRCH
+    VDU         D
 WRCH2:
-    LD          A,L
-    CALL        OSWRCH
-    LD          A,H
-    JP          OSWRCH
+    VDU         L
+    VDU         H
+    RET
 ;
 EXPR3:
     CALL        CEXPRI
