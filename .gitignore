@@ -8,6 +8,9 @@
 # linker output
 *.map
 
+# Test file data
+*.DAT
+
 # build directories
 bin/
 obj/
