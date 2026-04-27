@@ -440,12 +440,12 @@ IMULM_8X8:
 	LD	E,A
 	MLT	DE			; DE = C * E
 
-	LD	HL,0
+	ZERO_A_UHL
 	EXX
-	LD	DE,0
-	LD	HL,0
+	ZERO_A_UHL
+	EX	DE, HL
+	ZERO_A_UHL
 	EXX
-	XOR	A
 	RET
 
 ;
@@ -472,13 +472,14 @@ IMULM_16X8:
 	LD	A,0
 	ADC	A,B			; high word low byte
 
-	LD	HL,0
+	UEXT	HL
+
 	EXX
-	LD	E,A
-	LD	D,0
-	LD	HL,0
-	EXX
+	LD	E, A
 	XOR	A
+	LD	D, A
+	SBC	HL, HL
+	EXX
 	RET
 
 ;
@@ -505,13 +506,14 @@ IMULM_8X16:
 	LD	A,0
 	ADC	A,B			; high word low byte
 
-	LD	HL,0
+	UEXT	HL
+
 	EXX
-	LD	E,A
-	LD	D,0
-	LD	HL,0
-	EXX
+	LD	E, A
 	XOR	A
+	LD	D, A
+	SBC	HL, HL
+	EXX
 	RET
 
 ;
@@ -564,11 +566,11 @@ FMUL:	DEC	B		;TEST FOR ZERO
 	PUSH	BC		;SAVE EXPONENTS
 	LD	B,H		;LOAD REGISTERS
 	LD	C,L
-	LD	HL,0
+	UEXT	HL
 	EXX
 	LD	B,H
 	LD	C,L
-	LD	HL,0
+	SBC	HL, HL
 	LD	A,-32		;LOOP COUNTER
 	CALL	MULA		;MULTIPLY
 	CALL	C,MULB		;NORMALISE & INC A

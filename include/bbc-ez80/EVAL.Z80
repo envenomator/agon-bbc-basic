@@ -2631,3 +2631,45 @@ MOD161:	CCF
 	ADC.S	HL,HL
 	JR	MOD160
 ;
+
+;===========================================================
+
+;-----------------------------------------------------------
+; Non platform specific eZ80 Support routines
+;-----------------------------------------------------------
+
+	GLOBAL	INT24_TO_32
+	GLOBAL	DLOAD5_SPL
+
+; CONVERT UNSIGNED 24 BIT NUMBER IN HL
+; TO STANDARD 32BIT NUMBER REPRESENTATION
+; INPUT
+;   UHL = UNSIGNED 24 BIT NUMBER
+; OUTPUT
+;   HLH'L', C=0 = 32 BIT NUMBER
+;
+INT24_TO_32:
+	LD	(conversion_store), HL ; H'L' - LOW PART
+	EXX
+	LD	A, (conversion_store + 2)
+	LD	L, A		; L = U
+	XOR	A
+	LD	H, A		; H = 0
+	LD	C, A		; C = 0
+	RET
+
+; THIS FUNCTION REPLACES DLOAD5 FOR WHEN IX POINTS TO A STACK FRAME
+; CONTAINING 'PUSHED REGISTERS'.
+
+; AS REGISTERS ARE NOW 3 BYTES LONG THE OFFSETS FOR EACH BYTE NEEDS
+; TO BE ADJUSTED
+
+DLOAD5_SPL:
+	LD      B,(IX+6)
+	EXX
+	LD	DE, (IX+0)
+	EXX
+	LD	DE, (IX+3)
+	RET
+
+	END

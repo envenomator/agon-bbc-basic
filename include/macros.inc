@@ -81,6 +81,17 @@
 	POP	HL
 .endm
 
+; zero uHL
+.macro	UEXT	arg	; arg can only be HL
+	OR	A
+	SBC	\arg, \arg
+.endm
+
+.macro	ZERO_A_UHL
+	XOR	A
+	SBC	HL, HL
+.endm
+
 ; Macro for calling the API
 ; Parameters:
 ; - function: One of the function numbers listed above
