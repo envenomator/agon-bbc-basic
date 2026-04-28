@@ -129,7 +129,7 @@ CLEAR_RAM:
 
     LD          HL, bss_start
     LD          DE, bss_start + 1
-    LD          BC, bss_size
+    LD          BC, bss_size - 1
     XOR         A
     LD          (HL), A
     LDIR
