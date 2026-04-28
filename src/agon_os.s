@@ -93,8 +93,8 @@ OSINIT:
     CALL        VBLANK_INIT
     XOR         A
     LD          (FLAGS), A                              ; Clear flags and set F = Z
-    LD          HL, bss_end
-    LD          DE, STACKTOP
+    LD          HL, bss_end                             ; PAGE will be set to this value
+    LD          DE, RAM_END                             ; HIMEM will be set to this value
     LD          E, A                                    ; Page boundary
     LD          A, (ACCS)                               ; Return NZ if there is a file to chain
     OR          A
