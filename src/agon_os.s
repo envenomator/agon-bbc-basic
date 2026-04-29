@@ -620,7 +620,7 @@ OSSAVE_TXT:
     LD          IX, LISTON                              ; Required for LISTIT
     LD          HL, (PAGE)                              ; Get start of program area
     EXX
-    LD          BC, 0                                   ; Set the initial indent counters
+    LD          DE, 0                                   ; Set the initial indent counters
     EXX
 OSSAVE_TXT1:
     LD          A, (HL)                                 ; Check for end of program marker
