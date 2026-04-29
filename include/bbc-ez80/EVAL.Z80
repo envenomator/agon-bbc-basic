@@ -1766,6 +1766,7 @@ DECODE:	EXX
 	EXX
 	LD	HL, 0
 	LD	C, L
+	XOR	A ; numeric marker
 	RET
 ;
 ;HEXSTR - convert numeric value to HEX string.
