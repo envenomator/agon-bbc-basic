@@ -523,12 +523,8 @@ FNEND1:	EX	AF,AF'
 FNEND2:
 	; If the BASIC runtime stack is empty, we cannot scan for FNCHK.
 	; This is the direct-mode "=expr" / top-level "=expr" case.
-	LD HL,0
-	ADD HL,SP          ; HL = current SP
-	LD DE,(SPL)        ; saved empty-stack/top SP
-	OR A
-	SBC HL,DE
-	JR NC,FNEND_NOFN   ; SP >= SPL: no FN frame to find
+	CALL STKANY
+	JR NC,FNEND_NOFN
 	POP	BC
 	LD	HL,FNCHK
 	XOR	A
@@ -981,7 +977,10 @@ REPCHK	EQU	$
 ;
 ;UNTIL expr
 ;
-UNTIL:	POP	BC
+UNTIL:
+	CALL STKANY
+	JR NC,UNTIL_NO_REPEAT
+	POP	BC
 	PUSH	BC
 	LD	HL,REPCHK
 	OR	A
@@ -990,6 +989,7 @@ UNTIL:	POP	BC
 	LD	A,3
 	CALL	RESLOC
 	JR	NZ,UNTIL
+UNTIL_NO_REPEAT:
 	LD	A,43
 	JR	ERROR2		;"Not in a REPEAT loop"
 ;
@@ -1063,7 +1063,10 @@ FORCHK	EQU	$
 ;
 ;NEXT [var[,var...]]
 ;
-NEXT:	POP	BC		;MARKER
+NEXT:
+	CALL STKANY
+	JR NC,NEXT_NO_FOR
+	POP	BC		;MARKER
 	LD	HL,FORCHK
 	OR	A
 	SBC	HL,BC
@@ -1072,6 +1075,7 @@ NEXT:	POP	BC		;MARKER
 	LD	A,3
 	CALL	RESLOC
 	JR	NZ,NEXT
+NEXT_NO_FOR:
 	LD	A,32
 	JR	ERROR3		;"Not in a FOR loop"
 ;
@@ -1440,7 +1444,10 @@ LOCAL4:	LD	(IX+0),1	;FLAG LOCAL ARRAY
 ;
 ;ENDPROC
 ;
-ENDPRO:	POP	BC
+ENDPRO:
+	CALL STKANY
+	JR NC,ENDPRO_NO_PROC
+	POP	BC
 	LD	HL,PROCHK	;PROC MARKER
 	XOR	A
 	SBC	HL,BC
@@ -1448,6 +1455,7 @@ ENDPRO:	POP	BC
 	PUSH	BC		;PUT BACK
 	CALL	RESLOC
 	JR	NZ,ENDPRO
+ENDPRO_NO_PROC:
 	LD	A,13
 	JP	ERROR		;"No PROC"
 ;
@@ -3544,6 +3552,26 @@ STORE5_SPL:
 	LD	(IX+3),L
 	LD	(IX+4),H
 	LD	(IX+5),A
+	RET
+
+	GLOBAL	STKANY
+
+; This function checks if the BASIC stack has at least one item
+; Outputs:
+; C  = BASIC stack has at least one item
+; NC = BASIC stack empty
+; Destroys HL, DE, flags
+
+STKANY:
+	LD	HL,0
+	ADD	HL,SP
+
+	LD	DE,3        ; compensate for CALL return address in ADL mode
+	ADD	HL,DE       ; HL = caller's SP
+
+	LD	DE,(SPL)
+	OR	A           ; clear carry
+	SBC	HL,DE       ; caller_SP - SPL
 	RET
 
 	END
