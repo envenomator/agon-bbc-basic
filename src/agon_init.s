@@ -16,7 +16,7 @@
     JP          AGON_START
 
 EXEC_NAME:
-    .asciz      "BBCBASIC.BIN"  ; Executable name (argv[0])
+    .asciz      "BASIC.BIN"     ; Executable name (argv[0])
 chain_start:
     .asciz      "CHAIN  \x22"   ; Begin part of chain string
 chain_end:
@@ -59,7 +59,7 @@ AGON_START:
     CALL        STAR_VERSION    ; Output the AGON version
     CALL        TELL
     .ascii      "Usage:\n\r"
-    .asciz      "BBCBASIC <filename>\n\r"
+    .asciz      "BASIC <filename>\n\r"
     JR          AGON_END
 ;							
 ; Copies CHAIN prefix and filename to ACCS, sets boolean STARTUPCMD

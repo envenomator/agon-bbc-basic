@@ -3,12 +3,12 @@
 A port of BBC Basic for Z80 by R.T.Russell.  Modified to run in eZ80/ADL mode on the Agon Platform.
 This port is targetting to be functionally compatible with BBC Basic V5 for the Z80 as per upstream repo https://github.com/rtrussell/BBCZ80
 
-### Status: work in progress
+### Status: beta
 
-See the issue list for functionality that isn't supported yet.
+See the issue list for any functionality that isn't supported yet.
 
 ### Installation
-Copy the 'bbcbasic.bin' file to the /bin folder of your SD card.
+Copy the 'basic.bin' file to the /bin folder of your SD card.
 
 ### Agon specific
 

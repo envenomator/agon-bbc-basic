@@ -1,5 +1,5 @@
 # Project name
-NAME = bbcbasic
+NAME = basic
 
 # Emulator SDcard destination defaults to /bin if not set by the user
 FAE_DEST ?= /bin
