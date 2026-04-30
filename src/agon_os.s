@@ -693,9 +693,11 @@ EXT_HANDLER_1:
     OR          A
     JR          NZ, EXT_HANDLER_1                       ; No, so loop
 ;
-    LD          A,204                                   ; Throw a "Bad name" error
-    CALL        EXTERR
-    .asciz      "Bad name"
+    ;LD          A,204                                   ; Throw a "Bad name" error
+    ;CALL        EXTERR
+    ;.asciz      "Bad name"
+    LD          A,4
+    JP          OSERROR
 ;
 EXT_HANDLER_2:
     INC         DE                                      ; Skip to the file extension # byte
@@ -2752,8 +2754,6 @@ CRTONULL2:
 ;
 CSTR_FNAME:
     LD          A, (HL)                                 ; Get source
-    CP          32                                      ; Is it space
-    JR          Z, 1f
     CP          CR                                      ; Or is it CR
     JR          Z, 1f
     LD          (DE), A                                 ; No, so store

@@ -23,6 +23,8 @@ chain_end:
     .byte       0x22,0x0d,0     ; End part of chain string
 SP_EXIT:
     .space      3               ; saved INIT stack pointer
+filenameptr:
+    .space      3               ; first parsed CLI parameter, after quote removal
 
 MOS_HEADER:
     .balign     0x40
@@ -43,13 +45,12 @@ AGON_START:
     LD          (SP_EXIT), SP   ; Save MOS area stack pointer
     LD          SP, STACKTOP    ; Set the new stack pointer for the program (from linker.conf)
     CALL        CLEAR_RAM
-    PUSH        HL
 
     CALL        PARSE_PARAMS
     CALL        GET_SYSVARS
     LD          HL, ACCS        ; Clear the ACCS
     LD          (HL), 0
-    POP         HL
+    LD          HL, (filenameptr) ; first parsed parameter, normalized by PARSE_PARAMS
     LD          B, 0            ; C = argc
     LD          A, C			
     CP          2
@@ -63,7 +64,7 @@ AGON_START:
 ;							
 ; Copies CHAIN prefix and filename to ACCS, sets boolean STARTUPCMD
 AUTOLOAD:
-    PUSH        HL              ; save original parameter string
+    PUSH        HL              ; save filename pointer
     LD          IX, ACCS
     LD          HL, chain_start ; copy start of string
     CALL        APPEND_CSTR
@@ -149,35 +150,86 @@ CLEAR_RAM:
 ;
 ; In:
 ;   HL = parameter string
-;   IX = pointer to empty array of stringpointers
 ; Out:
 ;   C  = number of parameters in argc style, counting 'filename' which isn't given by MOS
 ;   Tokenized in-place parameter string with zeroes
 ;
 PARSE_PARAMS:
+    PUSH        HL
+    LD          HL, 0
+    LD          (filenameptr), HL  ; no first parameter yet
+    POP         HL
     LD          BC, 1              ; Skip checking filename
     LD          B, ARGV_PTRS_MAX-1
 1:
+    CALL        SKIP_SPACES
+    LD          A, (HL)
+    OR          A
+    RET         Z                  ; no more tokens
+    CP          13                 ; CR
+    RET         Z
+    CP          '"'
+    JR          Z, 2f              ; quoted token
+
     PUSH        BC                 ; save counter
     PUSH        HL                 ; save token start
+    LD          B, ' '
     CALL        GET_TOKEN
     LD          A, C               ; token length
     POP         DE                 ; token start
     POP         BC                 ; argc
     OR          A
     RET         Z                  ; no more tokens
+    CALL        STORE_ARG_PTR
     PUSH        HL
     POP         DE
     CALL        SKIP_SPACES
     XOR         A
     LD          (DE), A            ; null terminate
-    INC         IX
-    INC         IX
-    INC         IX
+    JR          3f
+
+2:
+    INC         HL                 ; skip opening quote
+    PUSH        BC                 ; save counter
+    PUSH        HL                 ; save token start, excluding quote
+    LD          B, '"'
+    CALL        GET_TOKEN
+    POP         DE                 ; token start
+    POP         BC                 ; argc
+    CALL        STORE_ARG_PTR
+
+    LD          A, (HL)
+    CP          '"'
+    JR          NZ, 4f
+    XOR         A
+    LD          (HL), A            ; replace closing quote with terminator
+    INC         HL                 ; continue after closing quote
+    CALL        SKIP_SPACES
+    JR          3f
+4:
+    XOR         A
+    LD          (HL), A            ; terminate on CR; harmless on zero
+
+3:
     INC         C
     LD          A, C
     CP          B
     JR          C, 1b
+    RET
+
+;
+; Store first real CLI parameter
+;
+; In:
+;   DE = token start, already adjusted past opening quote when quoted
+;   C  = argc-style count before adding this argument; C=1 means first real CLI parameter
+;
+STORE_ARG_PTR:
+    LD          A, C
+    CP          1
+    RET         NZ
+    LD          (filenameptr), DE
+    RET
 
 ;
 ; Get next token
@@ -187,6 +239,7 @@ PARSE_PARAMS:
 ;
 ; Out:
 ;   HL = first char after token
+;   B  = token terminator
 ;   C  = length
 ;
 GET_TOKEN:
@@ -197,7 +250,7 @@ GET_TOKEN:
     RET         Z
     CP          13 ; CR
     RET         z
-    CP          ' '
+    CP          B
     RET         Z
     INC         HL
     INC         C
