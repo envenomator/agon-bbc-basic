@@ -87,9 +87,10 @@
 	SBC	\arg, \arg
 .endm
 
-.macro	ZERO_A_UHL
+; zero uHL and A
+.macro	UEXTA	arg	; arg can only be HL
 	XOR	A
-	SBC	HL, HL
+	SBC	\arg, \arg
 .endm
 
 ; Macro for calling the API

@@ -506,8 +506,7 @@ LNZERO:
     CALL        LEXAN2                                  ; LEXICAL ANALYSIS
     POP         HL
     LD          (DE),A                                  ; TERMINATOR
-    XOR         A
-    LD          B,A
+    LD          BC,0
     LD          C,E                                     ; BC=LINE LENGTH
     INC         DE
     LD          (DE),A                                  ; ZERO NEXT

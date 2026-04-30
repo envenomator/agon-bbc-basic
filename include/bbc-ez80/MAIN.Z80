@@ -210,11 +210,11 @@ CLOOP:	SCF
 	JR	Z,NOAUTO
 	PUSH	HL
 	CALL	PBCD		;AUTO NUMBER
-	POP	HL
-	LD	BC,0
-	LD	A,(INCREM)
-	LD	C,A
-	ADD	HL,BC
+	POP	BC
+	UEXT	HL
+	LD	A, (INCREM)
+	LD	L, A
+	ADD	HL, BC
 	JP	C,TOOBIG
 	LD	(AUTONO),HL
 	LD	A,' '
@@ -1118,19 +1118,19 @@ RENUM6:	POP	HL
 ;AUTO ,increment
 ;
 AUTO:	CALL	PAIR
-	LD	(AUTONO),HL
+	LD	(AUTONO), HL
 	PUSH	DE
 	PUSH	BC
 	LD	DE, 256
-	OR	A						; clear carry
-	PUSH  BC
-	POP   HL
-	SBC	HL,DE				; BC - 256
-	POP		BC
-	POP		DE
+	OR	A		; clear carry
+	PUSH	BC
+	POP	HL
+	SBC	HL, DE		; BC - 256
+	POP	BC
+	POP	DE
 	JP	NC, TOOBIG	; Increment > 255
-	LD	A,C
-	LD	(INCREM),A
+	LD	A, C
+	LD	(INCREM), A
 	JR	CLOOP0
 ;
 ;BAD
