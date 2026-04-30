@@ -520,7 +520,16 @@ FNEND1:	EX	AF,AF'
 	POP	BC
 	EX	DE,HL		;SAVE RESULT IN A'B'C'D'E'
 	EXX
-FNEND2:	POP	BC
+FNEND2:
+	; If the BASIC runtime stack is empty, we cannot scan for FNCHK.
+	; This is the direct-mode "=expr" / top-level "=expr" case.
+	LD HL,0
+	ADD HL,SP          ; HL = current SP
+	LD DE,(SPL)        ; saved empty-stack/top SP
+	OR A
+	SBC HL,DE
+	JR NC,FNEND_NOFN   ; SP >= SPL: no FN frame to find
+	POP	BC
 	LD	HL,FNCHK
 	XOR	A
 	SBC	HL,BC
@@ -528,6 +537,7 @@ FNEND2:	POP	BC
 	PUSH	BC
 	CALL	RESLOC
 	JR	NZ,FNEND2
+FNEND_NOFN:
 	LD	A,7
 	JR	ERROR0		;"No FN"
 ;
