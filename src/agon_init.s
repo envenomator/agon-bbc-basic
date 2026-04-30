@@ -23,10 +23,15 @@ chain_end:
     .byte       0x22,0x0d,0     ; End part of chain string
 SP_EXIT:
     .space      3               ; saved INIT stack pointer
-    .balign     64
-    .ascii      "MOS"           ; MOS signature
-    .byte       0x00            ; Header version
-    .byte       0x01            ; Run mode (0=Z80, 1=ADL)
+
+MOS_HEADER:
+    .balign     0x40
+    .ascii      "MOS"           ; 0x40 MOS signature
+    .byte       0x01            ; 0x43 Advanced header
+    .byte       0x01            ; 0x44 Executable type (0=Z80, 1=ADL)
+    .byte       0b00001101      ; 0x45 Flags (Module safe / strip spaces / header includes load address)
+    .byte       0b11110010      ; 0x46 bit-inverted copy of flags
+    .d24        RAM_START       ; 0x47 Load/execution address
 
 AGON_START:
     PUSH        AF              ; Preserve registers
