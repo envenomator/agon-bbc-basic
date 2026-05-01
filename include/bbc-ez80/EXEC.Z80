@@ -520,11 +520,12 @@ FNEND1:	EX	AF,AF'
 	POP	BC
 	EX	DE,HL		;SAVE RESULT IN A'B'C'D'E'
 	EXX
-FNEND2:
-	; If the BASIC runtime stack is empty, we cannot scan for FNCHK.
+
+	; If the BASIC runtime stack is empty, we cannot
+	; walk the stack searching for FNCHK.
 	; This is the direct-mode "=expr" / top-level "=expr" case.
-	CALL STKANY
-	JR NC,FNEND_NOFN
+FNEND2:	CALL	STKANY
+	JR	NC, FNEND_NOFN
 	POP	BC
 	LD	HL,FNCHK
 	XOR	A
@@ -977,9 +978,8 @@ REPCHK	EQU	$
 ;
 ;UNTIL expr
 ;
-UNTIL:
-	CALL STKANY
-	JR NC,UNTIL_NO_REPEAT
+UNTIL:	CALL	STKANY
+	JR	NC, UNTIL_NO_REPEAT
 	POP	BC
 	PUSH	BC
 	LD	HL,REPCHK
@@ -1063,9 +1063,8 @@ FORCHK	EQU	$
 ;
 ;NEXT [var[,var...]]
 ;
-NEXT:
-	CALL STKANY
-	JR NC,NEXT_NO_FOR
+NEXT:	CALL	STKANY
+	JR	NC, NEXT_NO_FOR
 	POP	BC		;MARKER
 	LD	HL,FORCHK
 	OR	A
@@ -1444,9 +1443,8 @@ LOCAL4:	LD	(IX+0),1	;FLAG LOCAL ARRAY
 ;
 ;ENDPROC
 ;
-ENDPRO:
-	CALL STKANY
-	JR NC,ENDPRO_NO_PROC
+ENDPRO:	CALL	STKANY
+	JR	NC, ENDPRO_NO_PROC
 	POP	BC
 	LD	HL,PROCHK	;PROC MARKER
 	XOR	A
@@ -3554,24 +3552,26 @@ STORE5_SPL:
 	LD	(IX+5),A
 	RET
 
-	GLOBAL	STKANY
-
-; This function checks if the BASIC stack has at least one item
+; This function checks SPL is equal to stack top,
+; as assigned into SPL at start up.
+;
+; Used by stack walkers to prevent walking above stack top
+;
 ; Outputs:
 ; C  = BASIC stack has at least one item
 ; NC = BASIC stack empty
 ; Destroys HL, DE, flags
 
-STKANY:
-	LD	HL,0
-	ADD	HL,SP
+STKANY:	UEXT	HL
+	ADD	HL, SP
 
-	LD	DE,3        ; compensate for CALL return address in ADL mode
-	ADD	HL,DE       ; HL = caller's SP
+	INC	HL		; compensate for CALL return address in ADL mode
+	INC	HL
+	INC	HL		; HL = caller's SP
 
-	LD	DE,(SPL)
-	OR	A           ; clear carry
-	SBC	HL,DE       ; caller_SP - SPL
+	LD	DE, (SPL)
+	OR	A		; clear carry
+	SBC	HL, DE		; caller_SP - SPL
 	RET
 
 	END
