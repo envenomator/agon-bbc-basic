@@ -2909,6 +2909,17 @@ RESAR1:	LD	SP,HL
 ;
 RESLOC:	POP	DE		;Return address
 	LD	IX,0		;To flag nothing was restored
+	EXX					; Preserve return address in DE'
+	CALL	STKANY	; C = stack has item, NC = empty
+	EXX                 ; Restore return address to DE
+
+	LD	IX,0
+	JR	C,RESLO1	; safe to POP marker
+
+	XOR	A	; Z = nothing restored
+	EX	DE,HL
+	JP	(HL)
+
 RESLO1:	POP	BC		;Marker ?
 	LD	HL,LOCCHK
 	OR	A
