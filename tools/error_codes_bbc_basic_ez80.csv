@@ -1,0 +1,58 @@
+Code,Message,Source/notes
+0,No room,ERRWDS table; also used as fatal/custom in some EXTERR cases
+1,Out of range,ERRWDS table
+2,,Reserved/blank entry in ERRWDS
+3,Multiple label,ERRWDS table
+4,Mistake,ERRWDS table
+5,"Missing ,",ERRWDS table
+6,Type mismatch,ERRWDS table
+7,Not in a FN,ERRWDS table
+8,,Reserved/blank entry in ERRWDS
+9,"Missing \"",ERRWDS table
+10,Bad DIM,ERRWDS table; EXEC.Z80 BADDIM uses A=10
+11,DIM space,ERRWDS table; EXEC.Z80 NOROOM uses A=11
+12,No such FN or PROC,ERRWDS table
+13,No PROC,ERRWDS table
+14,Bad use of array,ERRWDS table
+15,Bad subscript,ERRWDS table
+16,Syntax error,ERRWDS table
+17,Escape,ERRWDS table
+18,Division by zero,ERRWDS table
+19,String too long,ERRWDS table
+20,Number too big,ERRWDS table
+21,-ve root,ERRWDS table
+22,Log range,ERRWDS table
+23,Accuracy lost,ERRWDS table
+24,Exponent range,ERRWDS table
+25,No variable,ERRWDS table
+26,"Missing )",ERRWDS table
+27,Bad hex or binary,ERRWDS table
+28,No such FN/PROC,ERRWDS table
+29,Bad call,ERRWDS table
+30,Bad arguments,ERRWDS table
+31,Not in a FOR loop,ERRWDS table
+32,Can't match FOR,ERRWDS table
+33,Bad FOR variable,ERRWDS table
+34,Missing TO,ERRWDS table
+35,No GOSUB,ERRWDS table
+36,ON syntax,ERRWDS table
+37,ON range,ERRWDS table
+38,No such line,ERRWDS table
+39,Out of DATA,ERRWDS table
+40,Not in a REPEAT loop,ERRWDS table
+41,Bad EXIT,ERRWDS table
+42,Missing #,ERRWDS table
+43,Not in a WHILE loop,ERRWDS table
+44,Missing ENDCASE,ERRWDS table
+45,OF not last,ERRWDS table
+46,Missing ENDIF,ERRWDS table
+47,,Reserved/blank entry in ERRWDS
+48,,Reserved/blank entry in ERRWDS
+49,,Reserved/blank entry in ERRWDS
+50,Bad MOUSE variable,Custom EXTERR in src/agon_os.s
+51,,Reserved/blank entry in ERRWDS
+52,,Reserved/blank entry in ERRWDS
+53,ON ERROR not LOCAL,ERRWDS table
+54,DATA not LOCAL,ERRWDS table
+127+n,MOS error message,src/agon_os.s OSERROR maps MOS error n to BASIC error n+127 and fetches message via mos_getError
+254,Bad command,Custom EXTERR in src/agon_os.s
