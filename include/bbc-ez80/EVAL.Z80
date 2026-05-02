@@ -1417,7 +1417,7 @@ INSTR:	CALL	EXPRS		;STRING TO SEARCH
 	CALL	PUSHS		;SAVE STRING ON STACK
 	CALL	EXPRS		;SUB-STRING
 	POP	BC
-	LD	HL,0
+	UEXT	HL
 	ADD	HL,SP		;HL ADDRESSES MAIN
 	PUSH	BC		;C = MAIN STRING LENGTH
 	LD	B,E		;B = SUB-STRING LENGTH
@@ -1455,7 +1455,6 @@ INSTR2:	SBC	HL,SP
 	CALL	BRAKET
 	JP	COUNT1
 ;
-;ADL-safe substring search.
 ;SEARCH - Search string for sub-string
 ;   Inputs: Main string at HL length C
 ;           Sub-string at DE length B
@@ -1464,76 +1463,54 @@ INSTR2:	SBC	HL,SP
 ;           Z - found at location HL-1
 ;           Carry always cleared
 ;
-SEARCH:
+SEARCH:	PUSH	BC
+	LD	BC,0
+	LD	C,A
+	ADD	HL,BC		;NEW START ADDRESS
+	POP	BC
+
+	SUB	C
+	JR	NC,SRCH4
+	NEG
+	LD	C,A		;REMAINING LENGTH
+SRCH1:	LD	A,(DE)
 	PUSH	BC
-	LD		BC,0
-	LD		C,A
-	ADD		HL,BC
-	POP		BC
 
-	LD		A,C
-	SUB		B
-	JR		C,SRCH_NOTFOUND
-	INC		A
-	LD		C,A
+	PUSH	AF		; extend C to uBC unsigned
+	LD	A, C
+	LD	BC, 0
+	LD	C, A
+	POP	AF
 
-SRCH1:
-	LD		A,C
-	OR		A
-	JR		Z,SRCH_NOTFOUND
-
-	LD		A,(DE)
-	PUSH	BC
-	PUSH	AF
-	LD		A,C
-	LD		BC,0
-	LD		C,A
-	POP		AF
-	CPIR
-	JR		NZ,SRCH_FIRST_NOTFOUND
-
-	LD		A,C
-	POP		BC
-	LD		C,A
-
-	LD		A,B
-	DEC		A
-	JR		Z,SRCH_FOUND
-
+	CPIR			;FIND FIRST CHARACTER
+	LD	A,C
+	POP	BC
+	JR	NZ,SRCH4
+	LD	C,A
+	DEC	B		;Bug fix
+	CP	B		;Bug fix
+	INC	B		;Bug fix
+	JR	C,SRCH4		;Bug fix
 	PUSH	BC
 	PUSH	DE
 	PUSH	HL
-	LD		B,A
-
-SRCH2:
-	INC		DE
-	LD		A,(DE)
-	CP		(HL)
-	JR		NZ,SRCH_CMPFAIL
-	INC		HL
+	DEC	B
+	JR	Z,SRCH3		;FOUND !
+SRCH2:	INC	DE
+	LD	A,(DE)
+	CP	(HL)
+	JR	NZ,SRCH3
+	INC	HL
 	DJNZ	SRCH2
-
-	POP		HL
-	POP		DE
-	POP		BC
-
-SRCH_FOUND:
-	XOR		A
-	RET
-
-SRCH_CMPFAIL:
-	POP		HL
-	POP		DE
-	POP		BC
-	JR		SRCH1
-
-SRCH_FIRST_NOTFOUND:
-	POP		BC
-
-SRCH_NOTFOUND:
-	OR		0FFH
-	RET
-
+SRCH3:	POP	HL
+	POP	DE
+	POP	BC
+	JR	NZ,SRCH1
+	XOR	A		;Z, NC
+	RET			;FOUND
+;
+SRCH4:	OR	0FFH		;NZ, NC
+	RET			;NOT FOUND
 ;
 ;CHR$ - Return character with given ASCII value.
 ;Result is string.

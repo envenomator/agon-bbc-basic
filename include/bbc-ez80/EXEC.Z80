@@ -1843,8 +1843,8 @@ XEQGO5:	JP	XEQ
 ;
 ; ENDWHILE
 ;
-ENDWHI: CALL STKANY
-	JR   NC,ENDWH_NO_WHILE
+ENDWHI:	CALL	STKANY
+	JR	NC, ENDWH_NO_WHILE
 	POP	BC		;Marker
 	POP	DE		;Saved text pointer
 	PUSH	DE
@@ -2532,7 +2532,7 @@ MODIFS:	LD	A,L		;Operator
 	LD	A,E
 	ADD	A, C
 	LD	A,19		;String too long
-ERRORC:	JR	C,ERROR6
+ERRORC:	JP	C,ERROR
 	LD	A,B		;Type
 	INC	C
 	DEC	C
@@ -2628,19 +2628,32 @@ STORS1:	CALL	STORE4STR	;PRESERVES CARRY!
 	LDIR
 	RET	NC		;STRING REPLACED
 	LD	(FREE),DE
+
+
 CHECK:	PUSH	HL
 	PUSH	BC
 	PUSH	DE
 	LD	HL, (HIMEM)
 	EX	DE, HL
 	LD	HL, (FREE)
-	LD	BC, 100h		; BC: One page of memory
+	LD	BC, 100h	; BC: One page of memory
 	ADD	HL, BC		; Add a page to FREE
 	SBC	HL, DE		; And subtract the current HIMEM
+				; HIMEM is in the same page, so error "No Room"
+	JR	NC, ERROR_NOROOM
+
+	; TEST IF SPL IS AT SPL_BOTTOM OR LOWER
+	UEXT	HL
+	ADD	HL, SP
+	LD	DE, SPL_BOTTOM
+	OR	A
+	SBC	HL, DE
 	POP	DE
 	POP	BC
 	POP	HL
-	RET	C		; HIMEM is not in the same page, so just return
+	RET	NC
+
+ERROR_NOROOM:
 	XOR	A
 ERROR6:	JP	ERROR		;"No room"
 ;
@@ -2909,14 +2922,14 @@ RESAR1:	LD	SP,HL
 ;
 RESLOC:	POP	DE		;Return address
 	LD	IX,0		;To flag nothing was restored
-	EXX					; Preserve return address in DE'
-	CALL	STKANY	; C = stack has item, NC = empty
-	EXX                 ; Restore return address to DE
+	EXX			; Preserve return address in DE'
+	CALL	STKANY		; C = stack has item, NC = empty
+	EXX                 	; Restore return address to DE
 
 	LD	IX,0
 	JR	C,RESLO1	; safe to POP marker
 
-	XOR	A	; Z = nothing restored
+	XOR	A		; Z = nothing restored
 	EX	DE,HL
 	JP	(HL)
 
