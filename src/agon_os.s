@@ -47,6 +47,7 @@
     .global     OSWORD
     .global     OSWRCH
     .global     PLOT
+    .global     PLOT_POINT
     .global     POINT
     .global     PROMPT
     .global     PUTCSR
@@ -1750,6 +1751,20 @@ RETEXX:
     XOR         A
     LD          C,A
     RET
+
+PLOT_POINT:
+	CALL	EXPRI
+	EXX
+	PUSH	HL
+	CALL	CEXPRI
+
+	EXX
+	POP	DE
+
+	LD	C, 69		; PLOT POINT
+	CALL	VDU25
+	JP	XEQ
+
 ;
 ;ADVAL - var=ADVAL(n)
 ;
