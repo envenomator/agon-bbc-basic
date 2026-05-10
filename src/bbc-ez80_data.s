@@ -7,7 +7,6 @@
     .global     OSWRCHFH
     .global     KEYDOWN
     .global     KEYASCII
-    .global     KEYCOUNT
     .global     SCRAP
     .global     DATA_START
     .global     DATA_END
@@ -44,8 +43,6 @@ KEYDOWN:
     .space      1 ; Keydown flag
 KEYASCII:
     .space      1 ; ASCII code of pressed key
-KEYCOUNT:
-    .space      1 ; Counts every time a key is pressed
 SCRAP:
     .space      31
 ;

@@ -91,7 +91,7 @@ portD       .equ    0xA2
 ;  Destroys: A,D,E,H,L,F
 ;
 OSINIT:
-    CALL        VBLANK_INIT
+    CALL        SETUP_KB_HANDLER
     XOR         A
     LD          (FLAGS), A                              ; Clear flags and set F = Z
     LD          HL, bss_end                             ; PAGE will be set to this value
@@ -1501,7 +1501,7 @@ STAR_ASM:
 ; *BYE/QUIT
 ;
 BYE:
-    CALL        VBLANK_STOP
+    CALL        CLEAR_KB_HANDLER
     JP          AGON_END
 
 ; *EDIT linenum
@@ -2853,73 +2853,45 @@ CSTR_CAT_1:
     INC         DE
     JR          CSTR_CAT_1                              ; Loop until finished
 
-; Hook into the MOS VBLANK interrupt
-;
-VBLANK_INIT:
-    DI
-    LD          HL, VBLANK_HANDLER                      ; this interrupt handler routine who's
-    LD          E, 0x32                                 ; Set up the VBlank Interrupt Vector
-    MOSCALL     mos_setintvector
-    EX          DE, HL                                  ; DEU: Pointer to the MOS interrupt vector
-    LD          HL, VBLANK_HANDLER_JP + 1               ; Pointer to the JP address in this segment
-    LD          (HL), DE                                ; Self-modify the code
-    EI
+SETUP_KB_HANDLER:
+    LD          HL, ON_KB_EVENT
+    LD          C, 0
+    MOSCALL     mos_setkbvector
     RET
 
-; Unhook the custom VBLANK interrupt
-;
-VBLANK_STOP:
-    DI
-    LD          HL, VBLANK_HANDLER_JP + 1               ; Pointer to the JP address in this segment
-    LD          DE, (HL)
-    EX          DE, HL                                  ; HLU: Address of MOS interrupt vector
-    LD          E, 0x32
-    MOSCALL     mos_setintvector                        ; Restore the MOS interrupt vector
-    EI
+CLEAR_KB_HANDLER:
+    LD          HL, 0
+    LD          C, 0
+    MOSCALL     mos_setkbvector
     RET
 
-VBLANK_HANDLER:
-    DI
-    PUSH        AF
+ON_KB_EVENT:
     PUSH        HL
     PUSH        IX
-    CALL        DO_KEYBOARD
-    POP         IX
-    POP         HL
-    POP         AF
-;
-; Finally jump to the MOS interrupt
-;
-VBLANK_HANDLER_JP:
-    JP          0                                       ; This is self-modified by VBLANK_INIT
 
-; A safe LIS call to ESCSET
-;
-DO_KEYBOARD:
-    LD          IX, (MOS_SYSVARS)
-    LD          HL, KEYCOUNT                            ; Check whether the keycount has changed
-    LD          A, (IX + sysvar_vkeycount)              ; by comparing the MOS copy
-    CP          (HL)                                    ; with our local copy
-    JR          NZ, DO_KEYBOARD_1                       ; Yes it has, so jump to the next bit
-;
-DO_KEYBOARD_0:
-    XOR         A                                       ; Clear the keyboard values
-    LD          (KEYASCII), A
-    LD          (KEYDOWN), A
-    RET                                                 ; And return
-;
-DO_KEYBOARD_1:
-    LD          (HL), A                                 ; Store the updated local copy of keycount
-    LD          A, (IX + sysvar_vkeydown)               ; Fetch key down value (1 = key down, 0 = key up)
+    PUSH        DE
+    POP         IX                                      ; Pointer to VDP keyboard packet in IX
+
+    LD          A, (IX+3)                               ; Is key down?
     OR          A
-    JR          Z, DO_KEYBOARD_0                        ; If it is key up, then clear the keyboard values
-;
-    LD          (KEYDOWN), A                            ; Store the keydown value
-    LD          A, (IX + sysvar_keyascii)               ; Fetch key ASCII value
-    LD          (KEYASCII), A                           ; Store locally
+    JR          Z, CLEAR_KB                             ; No:key up - clear values
+
+    LD          (KEYDOWN), A
+    LD          A, (IX+0)
+    LD          (KEYASCII), A
     CP          0x1B                                    ; Is it escape?
     CALL        Z, ESCSET                               ; Yes, so set the escape flags
-    RET                                                 ; Return to the interrupt handler
+    
+ON_KB_EXIT:
+    POP         IX
+    POP         HL
+    RET
+
+CLEAR_KB:
+    XOR         A
+    LD          (KEYASCII), A
+    LD          (KEYDOWN), A
+    JR          ON_KB_EXIT
 
 ;
 ; Fetch a character from the screen
