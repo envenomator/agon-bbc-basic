@@ -10,6 +10,9 @@ See the issue list for any functionality that isn't supported yet.
 ### Installation
 Copy the 'basic.bin' file to the /bin folder of your SD card.
 
+### Requirements
+Starting release v0.6, BBC Basic V requires at least MOS version 1.04RC2. While the user is encouraged to update to a much more modern version of [AgonPlatform MOS](https://github.com/AgonPlatform/agon-mos/releases), the ancient 1.04RC2+ MOS version is now the minimum supported configuration.
+
 ### Agon specific
 
 #### ADVAL channels

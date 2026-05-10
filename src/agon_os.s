@@ -1542,7 +1542,7 @@ STAR_EDIT3:
 ;
 STAR_VERSION:
     CALL        TELL                                    ; Output the welcome message
-    .asciz      "AGON eZ80/ADL release v0.5\n\r"
+    .asciz      "AGON eZ80/ADL release v0.6\n\r"
     RET
 
 ; OSCLI FX n [,value]
