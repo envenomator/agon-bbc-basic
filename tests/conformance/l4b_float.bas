@@ -84,6 +84,10 @@
  3080 PROCcheck_r("EXP(0)",EXP(0),1,1E-9)
  3090 PROCcheck_r("LN(EXP(3))",LN(EXP(3)),3,1E-6)
  3100 PROCcheck_r("EXP(LN(12.5))",EXP(LN(12.5)),12.5,1E-5)
+ 3115 PROCcheck_r("LOG(100)",LOG(100),2,1E-7)
+ 3116 PROCcheck_r("LOG(10)",LOG(10),1,1E-7)
+ 3117 PROCcheck_r("LOG(1)",LOG(1),0,1E-7)
+ 3118 PROCcheck_r("10^LOG(12.5)",10^LOG(12.5),12.5,1E-5)
  3110 ENDPROC
 
  3500 DEF PROCtest_angles
