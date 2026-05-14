@@ -12,7 +12,9 @@
   120 PROCsection("STRING EDGE CASES")
   130 PROCtest_str2
   140 PROCsection("FLOW / TOKENISER EDGE CASES")
-  150 PROCtest_flow2
+  141 PROCtest_flow2
+  142 PROCsection("FOR / NEXT STEP")
+  160 PROCtest_step
   155 PROCsection("CASE / OF / WHEN / OTHERWISE")
   156 PROCtest_case
   157 PROCsection("LET keyword")
@@ -448,6 +450,66 @@
 10719 PROCcheck_i("LET FN expression",vA%,18)
 
 10720 ENDPROC
+
+10900 DEF PROCtest_step
+10901 LOCAL vI%,vSum%,vCnt%
+
+10902 vSum%=0
+10903 FOR vI%=1 TO 10 STEP 2
+10904   vSum%=vSum%+vI%
+10905 NEXT
+10906 PROCcheck_i("STEP positive 2 sum",vSum%,25)
+
+10907 vSum%=0
+10908 FOR vI%=10 TO 1 STEP -2
+10909   vSum%=vSum%+vI%
+10910 NEXT
+10911 PROCcheck_i("STEP negative 2 sum",vSum%,30)
+
+10912 vCnt%=0
+10913 FOR vI%=1 TO 1 STEP 5
+10914   vCnt%=vCnt%+1
+10915 NEXT
+10916 PROCcheck_i("STEP single iteration",vCnt%,1)
+
+10917 vCnt%=0
+10918 FOR vI%=1 TO 10 STEP 20
+10919   vCnt%=vCnt%+1
+10920 NEXT
+10921 PROCcheck_i("STEP overshoot positive",vCnt%,1)
+
+10922 vCnt%=0
+10923 FOR vI%=10 TO 1 STEP -20
+10924   vCnt%=vCnt%+1
+10925 NEXT
+10926 PROCcheck_i("STEP overshoot negative",vCnt%,1)
+
+10927 vCnt%=0
+10928 FOR vI%=1 TO 10 STEP -1
+10929   vCnt%=vCnt%+1
+10930 NEXT
+10931 PROCcheck_i("STEP wrong direction positive range",vCnt%,0)
+
+10932 vCnt%=0
+10933 FOR vI%=10 TO 1 STEP 1
+10934   vCnt%=vCnt%+1
+10935 NEXT
+10936 PROCcheck_i("STEP wrong direction negative range",vCnt%,0)
+
+10937 vSum%=0
+10938 FOR vI%=2 TO 16 STEP 4
+10939   vSum%=vSum%+vI%
+10940 NEXT
+10941 PROCcheck_i("STEP positive 4 sum",vSum%,40)
+
+10942 vSum%=0
+10943 FOR vI%=-5 TO 5 STEP 5
+10944   vSum%=vSum%+vI%
+10945 NEXT
+10946 PROCcheck_i("STEP across zero",vSum%,0)
+
+10947 ENDPROC
+
 11000 DEF FNdbl(vN%)
 11010 =vN%*2
 
