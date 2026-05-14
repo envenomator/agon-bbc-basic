@@ -768,14 +768,6 @@ OSWORD_02:
     POP         IX
     RET
 
-; SOUND channel,volume,pitch,duration
-; Parameters:
-; - HL: Pointer to data
-;   - 0,1: Channel
-;   - 2,3: Volume 0 (off) to 15 (full volume)
-;   - 4,5: Pitch 0 - 255
-;   - 6,7: Duration -1 to 254 (duration in 20ths of a second, -1 = play forever)
-;
 OSWORD_07: EQU         AGON_SOUND
 
 ; OSWORD 0x09: POINT
@@ -2993,7 +2985,7 @@ AGON_POINT:
 ; Parameters:
 ; - HL: Pointer to data
 ;   - 0,1: Channel
-;   - 2,3: Volume 0 (off) to 15 (full volume)
+;   - 2,3: Volume 0 (off) to 15/-15 (full volume). Envelope behavior will be attached to a channel on the Agon platform, not attached as a positive volume ID
 ;   - 4,5: Pitch 0 - 255
 ;   - 6,7: Duration -1 to 254 (duration in 20ths of a second, -1 = play forever)
 ;
@@ -3007,10 +2999,14 @@ AGON_SOUND:
 ;
 ; Calculate the volume
 ;
-    LD          BC, 0
-    LD          C, (HL)                                 ; Volume
-    LD          B, 6                                    ; C already contains the volume
-    MLT         BC                                      ; Multiply by 6 (0-15 scales to 0-90)
+    LD          A, (HL)                                 ; Volume
+    OR          A
+    JP          P, 1f                                   ; ABS(volume)
+    NEG
+1:
+    LD          C, A
+    LD          B, 8                                    ; C already contains the volume
+    MLT         BC                                      ; Multiply by 8 (0-15 scales to 0-120). Anything over 127 is maxed by VDP
     LD          A, C
     LD          (VDU_BUFFER+2), A
     INC         HL
