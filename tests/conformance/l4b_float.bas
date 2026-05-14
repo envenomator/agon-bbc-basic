@@ -10,8 +10,10 @@
   100 PROCtest_basicreal
   110 PROCsection("TRANSCENDENTAL FUNCTIONS")
   120 PROCtest_trans
-  130 PROCsection("ROUNDING / INT / SGN")
-  140 PROCtest_round
+  130 PROCsection("INVERSE TRIG / ANGLE CONVERSION")
+  140 PROCtest_angles
+  145 PROCsection("ROUNDING / INT / SGN")
+  146 PROCtest_round
   150 PROCsection("PRECISION BOUNDARIES")
   160 PROCtest_precision
   170 PROCsection("ACCUMULATION")
@@ -83,6 +85,21 @@
  3090 PROCcheck_r("LN(EXP(3))",LN(EXP(3)),3,1E-6)
  3100 PROCcheck_r("EXP(LN(12.5))",EXP(LN(12.5)),12.5,1E-5)
  3110 ENDPROC
+
+ 3500 DEF PROCtest_angles
+ 3510 PROCcheck_r("ACS(1)",ACS(1),0,1E-7)
+ 3520 PROCcheck_r("ACS(0)",ACS(0),PI/2,1E-6)
+ 3530 PROCcheck_r("ACS(-1)",ACS(-1),PI,1E-6)
+ 3540 PROCcheck_r("ASN(0)",ASN(0),0,1E-7)
+ 3550 PROCcheck_r("ASN(1)",ASN(1),PI/2,1E-6)
+ 3560 PROCcheck_r("ASN(-1)",ASN(-1),-PI/2,1E-6)
+ 3570 PROCcheck_r("DEG(PI)",DEG(PI),180,1E-5)
+ 3580 PROCcheck_r("DEG(PI/2)",DEG(PI/2),90,1E-5)
+ 3590 PROCcheck_r("RAD(180)",RAD(180),PI,1E-6)
+ 3600 PROCcheck_r("RAD(90)",RAD(90),PI/2,1E-6)
+ 3610 PROCcheck_r("RAD(DEG(1))",RAD(DEG(1)),1,1E-6)
+ 3620 PROCcheck_r("DEG(RAD(45))",DEG(RAD(45)),45,1E-5)
+ 3630 ENDPROC
 
  4000 DEF PROCtest_round
  4010 PROCcheck_i("INT 1.999",INT(1.999),1)

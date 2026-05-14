@@ -13,6 +13,8 @@
   130 PROCtest_str2
   140 PROCsection("FLOW / TOKENISER EDGE CASES")
   150 PROCtest_flow2
+  155 PROCsection("CASE / OF / WHEN / OTHERWISE")
+  156 PROCtest_case
   160 PROCsection("ARRAY EDGE CASES")
   170 PROCtest_arr2
   180 PROCsection("ERROR REPORTING EDGE CASES")
@@ -200,6 +202,120 @@
  9000 vMark%=11 : RETURN
  9010 vMark%=22 : RETURN
  9020 vMark%=44 : RETURN
+
+ 9025 DEF PROCtest_case
+ 9026 LOCAL vA%,vB%,vC%,sA$,sB$
+ 9027 vA%=2
+ 9030 vB%=0
+ 9040 CASE vA% OF
+ 9050 WHEN 1
+ 9060   vB%=10
+ 9070 WHEN 2
+ 9080   vB%=20
+ 9090 WHEN 3
+ 9100   vB%=30
+ 9110 OTHERWISE
+ 9120   vB%=99
+ 9130 ENDCASE
+ 9140 PROCcheck_i("CASE numeric match",vB%,20)
+
+ 9150 vA%=5
+ 9160 vB%=0
+ 9170 CASE vA% OF
+ 9180 WHEN 1,3,5
+ 9190   vB%=135
+ 9200 WHEN 2,4,6
+ 9210   vB%=246
+ 9220 OTHERWISE
+ 9230   vB%=999
+ 9240 ENDCASE
+ 9250 PROCcheck_i("CASE multiple WHEN values",vB%,135)
+
+ 9260 vA%=8
+ 9270 vB%=0
+ 9280 CASE vA% OF
+ 9290 WHEN 1
+ 9300   vB%=1
+ 9310 WHEN 2
+ 9320   vB%=2
+ 9330 OTHERWISE
+ 9340   vB%=88
+ 9350 ENDCASE
+ 9360 PROCcheck_i("CASE OTHERWISE",vB%,88)
+
+ 9370 sA$="B"
+ 9380 sB$=""
+ 9390 CASE sA$ OF
+ 9400 WHEN "A"
+ 9410   sB$="ALPHA"
+ 9420 WHEN "B","b"
+ 9430   sB$="BRAVO"
+ 9440 WHEN "C"
+ 9450   sB$="CHARLIE"
+ 9460 OTHERWISE
+ 9470   sB$="OTHER"
+ 9480 ENDCASE
+ 9490 PROCcheck_s("CASE string match",sB$,"BRAVO")
+
+ 9500 vA%=10
+ 9510 vB%=0
+ 9520 CASE TRUE OF
+ 9530 WHEN vA%<5
+ 9540   vB%=1
+ 9550 WHEN vA%=10
+ 9560   vB%=2
+ 9570 WHEN vA%>0
+ 9580   vB%=3
+ 9590 OTHERWISE
+ 9600   vB%=4
+ 9610 ENDCASE
+ 9620 PROCcheck_i("CASE TRUE conditional match",vB%,2)
+
+ 9630 vA%=7
+ 9640 vB%=0
+ 9650 CASE vA% OF
+ 9660 WHEN 7
+ 9670   vB%=vB%+1
+ 9680   vB%=vB%+2
+ 9690 WHEN 8
+ 9700   vB%=99
+ 9710 OTHERWISE
+ 9720   vB%=-1
+ 9730 ENDCASE
+ 9740 PROCcheck_i("CASE multi-line WHEN block",vB%,3)
+
+ 9750 vA%=1
+ 9760 vB%=0
+ 9770 CASE vA% OF
+ 9780 WHEN 1
+ 9790   vB%=11
+ 9800 WHEN 1
+ 9810   vB%=22
+ 9820 OTHERWISE
+ 9830   vB%=33
+ 9840 ENDCASE
+ 9850 PROCcheck_i("CASE first match wins",vB%,11)
+
+ 9860 vA%=2
+ 9870 vB%=0
+ 9880 vC%=0
+ 9890 CASE vA% OF
+ 9900 WHEN 1
+ 9910   vB%=1
+ 9920 WHEN 2
+ 9930   vB%=2
+ 9940   CASE vB% OF
+ 9950   WHEN 2
+ 9960     vC%=20
+ 9970   OTHERWISE
+ 9980     vC%=99
+ 9990   ENDCASE
+10000 OTHERWISE
+10010   vB%=9
+10020 ENDCASE
+10030 PROCcheck_i("nested CASE outer",vB%,2)
+10040 PROCcheck_i("nested CASE inner",vC%,20)
+10050 ENDPROC
 
  10600 DEF PROCerr_div(RETURN vErr%,RETURN vErl%,RETURN sRep$)
  10610 LOCAL vA%
