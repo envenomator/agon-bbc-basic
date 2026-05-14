@@ -8,6 +8,9 @@
    80 PRINT "--------------------------------"
    90 PROCsection("NUMERIC EXPRESSIONS")
   100 PROCtest_numeric
+  101 PROCsection("CONVERSIONS")
+  102 PROCsection("VAL")
+  103 PROCtest_val
   110 PROCsection("STRINGS")
   120 PROCtest_strings
   130 PROCsection("FLOW CONTROL")
@@ -289,3 +292,29 @@
  10430 vX%=1/0
  10440 vErr%=0
  10450 ENDPROC
+
+ 10800 DEF PROCtest_val
+10801 LOCAL vR
+
+10802 PROCcheck_i("VAL integer",VAL("123"),123)
+
+10803 PROCcheck_i("VAL negative integer",VAL("-45"),-45)
+
+10804 vR=VAL("12.5")
+10805 PROCcheck_r("VAL real",vR,12.5,1E-6)
+
+10806 vR=VAL("-3.75")
+10807 PROCcheck_r("VAL negative real",vR,-3.75,1E-6)
+
+10808 PROCcheck_i("VAL leading spaces",VAL("   42"),42)
+
+10809 PROCcheck_i("VAL trailing spaces",VAL("99   "),99)
+
+10810 PROCcheck_i("VAL STR$ roundtrip",VAL(STR$(456)),456)
+
+10811 vR=VAL("1.25E2")
+10812 PROCcheck_r("VAL exponent",vR,125,1E-5)
+
+10813 PROCcheck_i("VAL zero",VAL("0"),0)
+
+10814 ENDPROC
