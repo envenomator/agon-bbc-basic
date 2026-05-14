@@ -15,6 +15,8 @@
   150 PROCtest_flow2
   155 PROCsection("CASE / OF / WHEN / OTHERWISE")
   156 PROCtest_case
+  157 PROCsection("LET keyword")
+  158 PROCtest_let
   160 PROCsection("ARRAY EDGE CASES")
   170 PROCtest_arr2
   180 PROCsection("ERROR REPORTING EDGE CASES")
@@ -416,8 +418,41 @@
  10640 vErr%=0 : vErl%=0 : sRep$=""
  10650 ENDPROC
 
+10700 DEF PROCtest_let
+10701 LOCAL vA%,vB%,sA$,aI%()
+
+10702 LET vA%=10
+10703 PROCcheck_i("LET integer assignment",vA%,10)
+
+10704 LET vA%=vA%+5
+10705 PROCcheck_i("LET integer expression",vA%,15)
+
+10706 vB%=20
+10707 LET vA%=vB%*2
+10708 PROCcheck_i("LET variable expression",vA%,40)
+
+10709 LET sA$="HELLO"
+10710 PROCcheck_s("LET string assignment",sA$,"HELLO")
+
+10711 LET sA$=sA$+" WORLD"
+10712 PROCcheck_s("LET string concat",sA$,"HELLO WORLD")
+
+10713 DIM aI%(5)
+10714 LET aI%(3)=123
+10715 PROCcheck_i("LET array assignment",aI%(3),123)
+
+10716 LET aI%(3)=aI%(3)+7
+10717 PROCcheck_i("LET array expression",aI%(3),130)
+
+10718 LET vA%=FNdouble(9)
+10719 PROCcheck_i("LET FN expression",vA%,18)
+
+10720 ENDPROC
 11000 DEF FNdbl(vN%)
 11010 =vN%*2
 
 11020 DEF FNcase_string$(sX$)
 11030 =sX$
+
+11040 DEF FNdouble(vN%)
+11050 =vN%*2
