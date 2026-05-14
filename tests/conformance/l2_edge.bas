@@ -21,6 +21,8 @@
   158 PROCtest_let
   160 PROCsection("ARRAY EDGE CASES")
   170 PROCtest_arr2
+  175 PROCsection("SWAP keyword")
+  176 PROCtest_swap
   180 PROCsection("ERROR REPORTING EDGE CASES")
   190 PROCtest_err2
   200 PRINT
@@ -518,3 +520,40 @@
 
 11040 DEF FNdouble(vN%)
 11050 =vN%*2
+
+12000 DEF PROCtest_swap
+12001 LOCAL vA%,vB%,sA$,sB$,aI%(),aS$()
+
+12002 vA%=10
+12003 vB%=20
+12004 SWAP vA%,vB%
+12005 PROCcheck_i("SWAP integer A",vA%,20)
+12006 PROCcheck_i("SWAP integer B",vB%,10)
+
+12007 sA$="LEFT"
+12008 sB$="RIGHT"
+12009 SWAP sA$,sB$
+12010 PROCcheck_s("SWAP string A",sA$,"RIGHT")
+12011 PROCcheck_s("SWAP string B",sB$,"LEFT")
+
+12012 DIM aI%(3)
+12013 aI%(0)=100
+12014 aI%(3)=300
+12015 SWAP aI%(0),aI%(3)
+12016 PROCcheck_i("SWAP integer array 0",aI%(0),300)
+12017 PROCcheck_i("SWAP integer array 3",aI%(3),100)
+
+12018 DIM aS$(2)
+12019 aS$(0)="ZERO"
+12020 aS$(2)="TWO"
+12021 SWAP aS$(0),aS$(2)
+12022 PROCcheck_s("SWAP string array 0",aS$(0),"TWO")
+12023 PROCcheck_s("SWAP string array 2",aS$(2),"ZERO")
+
+12024 vA%=1
+12025 aI%(1)=99
+12026 SWAP vA%,aI%(1)
+12027 PROCcheck_i("SWAP scalar array scalar",vA%,99)
+12028 PROCcheck_i("SWAP scalar array element",aI%(1),1)
+
+12029 ENDPROC
