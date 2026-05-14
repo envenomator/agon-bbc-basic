@@ -12,6 +12,8 @@
   120 PROCtest_seqfile
   130 PROCsection("EOF# / EXT# / PTR#")
   140 PROCtest_filepos
+  145 PROCsection("OPENUP")
+  146 PROCtest_openup
   150 PRINT
   160 PRINT "------------------------------------------"
   170 PRINT "TOTAL TESTS : ";vTest%
@@ -131,3 +133,46 @@
  4220 PROCcheck_t("EOF# final byte",EOF#vCh%)
  4230 CLOSE#vCh%
  4240 ENDPROC
+
+9500 DEF PROCtest_openup
+9501 LOCAL vCh%,vA%,vB%,vC%
+
+9502 vCh%=OPENOUT("L3BUP.DAT")
+9503 BPUT#vCh%,10
+9504 BPUT#vCh%,20
+9505 BPUT#vCh%,30
+9506 CLOSE#vCh%
+
+9507 vCh%=OPENUP("L3BUP.DAT")
+9508 PROCcheck_t("OPENUP returns valid handle",vCh%<>0)
+
+9509 PROCcheck_i("OPENUP initial PTR#",PTR#vCh%,0)
+9510 PROCcheck_i("OPENUP initial EXT#",EXT#vCh%,3)
+
+9511 PTR#vCh%=1
+9512 BPUT#vCh%,99
+9513 CLOSE#vCh%
+
+9514 vCh%=OPENIN("L3BUP.DAT")
+9515 vA%=BGET#vCh%
+9516 vB%=BGET#vCh%
+9517 vC%=BGET#vCh%
+9518 CLOSE#vCh%
+
+9519 PROCcheck_i("OPENUP byte 1 unchanged",vA%,10)
+9520 PROCcheck_i("OPENUP byte overwritten",vB%,99)
+9521 PROCcheck_i("OPENUP byte 3 unchanged",vC%,30)
+
+9522 vCh%=OPENUP("L3BUP.DAT")
+9523 PTR#vCh%=EXT#vCh%
+9524 BPUT#vCh%,55
+9525 CLOSE#vCh%
+
+9526 vCh%=OPENIN("L3BUP.DAT")
+9527 PROCcheck_i("OPENUP extend EXT#",EXT#vCh%,4)
+9528 PTR#vCh%=3
+9529 vA%=BGET#vCh%
+9530 CLOSE#vCh%
+
+9531 PROCcheck_i("OPENUP appended byte",vA%,55)
+9532 ENDPROC
