@@ -10,6 +10,7 @@ FILES=(
   EXEC.Z80
   MAIN.Z80
   MATH.Z80
+  TOKENIDS.Z80
 )
 
 echo "Creating destination directory: $DEST_DIR"
