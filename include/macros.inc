@@ -1,6 +1,8 @@
 ; Title: BBC Basic Interpreter - eZ80 version
 ; Required macros
 
+.include "version.inc"
+
 .macro    LOG param
   ; Empty macro to disable upstream logging
 .endm

@@ -263,7 +263,7 @@ CMDTAB:	PTR	LEFTSL		; C0  'LEFT$('
 	PTR	PUT		; OE  'PUT' **Token changed**
 	PTR	SYNTAX		; 0F  'BY '
 	PTR	EXIT		; 10  'EXIT '
-	PTR	PLOT_POINT	; 11  'POINT'
+	PTR	PLOT_POINT	; 11  'POINT '
 ;
 TLAST	EQU	TCMD-128+($-CMDTAB)/3
 ;
@@ -1795,7 +1795,7 @@ CASE2:	LD	A,(IY)
 ;
 CASE9:	BIT	0,B
 	JR	Z,XEQGO5
-  UEXT  HL
+	UEXT	HL
 	LD	L,C
 	ADD	HL,SP
 	LD	SP,HL
@@ -2643,9 +2643,8 @@ STORS1:	CALL	STORE4STR	;PRESERVES CARRY!
 CHECK:	PUSH	HL
 	PUSH	BC
 	PUSH	DE
-	LD	HL, (HIMEM)
-	EX	DE, HL
 	LD	HL, (FREE)
+	LD	DE, (HIMEM)
 	LD	BC, 100h	; BC: One page of memory
 	ADD	HL, BC		; Add a page to FREE
 	SBC	HL, DE		; And subtract the current HIMEM

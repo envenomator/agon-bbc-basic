@@ -1,0 +1,4 @@
+
+        GLOBAL  TWRTK
+
+TWRTK	EQU	011h            ; LAST WRAP AROUND TOKEN
