@@ -10,6 +10,7 @@
 
 # Test file data
 *.DAT
+tests/conformance/*.DAT
 
 # build directories
 bin/
