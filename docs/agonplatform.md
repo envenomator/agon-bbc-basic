@@ -3,13 +3,44 @@
 ## LOAD/SAVE
 The following file extensions are supported:
 
-- .BBC: LOAD and SAVE in BBC BASIC for Z80 tokenised format
+- .BBC: LOAD and SAVE in <em>BBC BASIC (Z80)</em> tokenised format
 - .BAS: LOAD and SAVE in plain text format (also .TXT and .ASC)
+
+If a file extension is omitted, ".BBC" is assumed.
 
 ## Line editing
 Lines can be edited by using:
 1) ````*EDIT <linenumber>````
 2) ````*<linenumber>```` - starting at the given linenumber, the user is allowed to scroll through the listing using arrow-keys and/or j/k keys to select a line to edit. Press RETURN, left arrow or BACKSPACE to confirm selection of the line to edit. Escape to quit.
+
+## STAR (\*) commands
+The following commands are supported in this port:
+
+### \*ASM
+Run the assembler
+
+### \*BYE
+Exit BBC BASIC and return to MOS - equivalent to EXIT
+
+### \*EDIT / *\<linenum\>
+Syntax: ````*EDIT linenum````
+Syntax: ````*<linenum>````
+
+Pull a line into the MOS line editor for editing
+
+### \*FX
+Syntax: ````*FX osbyte, params````
+Execute an OSBYTE command.
+
+The OSBYTE commands supported at the moment are:
+
+- 19: Wait for vertical blank retrace
+- 11: Set keyboard repeat delay in ms (250, 500, 750 or 1000) - MOS 1.03+
+- 12: Set keyboard repeat rate ins ms (between 33 and 500ms) - MOS 1.03+
+- 118: Set keyboard LED (Bit 0: Scroll Lock, Bit 1: Caps Lock, Bit 2: Num Lock) - does not currently change status, just the LED - MOS 1.03+
+
+### \*VERSION
+Display the current Agon release version of BBC BASIC
 
 ## AGON MOS integration
 For the most part, the MOS is transparent to BASIC; most of the operations via the MOS and VDP are accessed via normal BBC BASIC statements, with the following exceptions:
@@ -43,7 +74,8 @@ Example: This will work
 ````
 
 ## Inline assembler
-The inline ez80 assembler defaults to ADL=1 mode, as this best fits the default ADL mode of the BBC Basic port.
+The inline ez80 assembler defaults to ADL 1 mode, as this best fits the default ADL mode of the BBC Basic port.
+The ADL assembler directive can be used to change this behavior.
 
 ## ADVAL channels
 
@@ -93,6 +125,8 @@ The BBC Basic ENVELOPE keyword will not be implemented on the Agon platform. Ago
 INKEY behaves as documented, except when given a negative value as 'wait' time. The negative value represents the keyvalue to immediately check for. TRUE is returned when the given key is pressed, or 0 if not pressed.
 
 ## TINT behavior
+Syntax: ````<n-var>=TINT(X,Y)````
+
 TINT can be used to get the current 32bit colorvalue of a single pixel in BGR format. Each B/G/R color is 8bit. The upper 8bit of the 32bit colorvalue is set to 0 always. Setting a colorvalue isn't implemented.
 
 ## MODE
@@ -112,7 +146,7 @@ Set the logical colour l to the physical colour p
 Syntax: ````COLOUR l,r,g,b````
 
 ## GCOL
-Syntax: GCOL mode,c
+Syntax: ````GCOL mode,c````
 Set the graphics colour c, and the "mode" of graphics paint operations.
 
 Colour values are interpreted as per the COLOUR command, i.e. values below 128 will set the foreground colour, and values above 128 set the background colour.
@@ -125,23 +159,23 @@ As of Console8 VDP 2.6.0, all 8 of the basic modes are supported for all current
 [GCOL paint modes](https://agonplatform.github.io/agon-docs/vdp/PLOT-Commands/#interaction-with-gcol-paint-modes)
 
 ## POINT
-Syntax: ````POINT(x,y)````
+Syntax: ````<n-var>=POINT(X,Y)````
 This returns the physical colour index of the colour at pixel position (x, y)
 
 ## PLOT
 Syntax: ````PLOT mode,x,y````
 For information on the various PLOT modes, please see the [VDP PLOT command documentation](https://agonplatform.github.io/agon-docs/vdp/PLOT-Commands/)
 
-## GET$
-Syntax: ````GET$(x,y)````
-Returns the ASCII character at position x,y
-
 ## GET
-Syntax: ````GET(x,y)````
-As GET$, but returns the ASCII code of the character at position x, y
+Syntax: ````<n-var>=GET(X,Y)````
+returns the ASCII code of the character at position x, y
 
-Syntax: ````GET(p)````
-Read and return the value of Z80 port p
+Syntax: ````<n-var>=GET(p)````
+Read and return the value of eZ80 port p
+
+## GET$
+Syntax: ````<str-var>=GET$(X,Y)````
+Returns the ASCII character at position x,y as a string
 
 ## SOUND
 Syntax: ````SOUND channel,volume,pitch,duration````
