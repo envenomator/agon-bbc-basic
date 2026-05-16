@@ -20,7 +20,7 @@ The following commands are supported in this port:
 Run the assembler
 
 ### \*BYE
-Exit BBC BASIC and return to MOS - equivalent to EXIT
+Exit BBC BASIC and return to MOS - equivalent to QUIT
 
 ### \*EDIT / *\<linenum\>
 Syntax: ````*EDIT linenum````
