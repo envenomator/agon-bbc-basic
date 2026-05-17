@@ -122,7 +122,12 @@ Other ADVAL channel values are ignored and return 0
 The BBC Basic ENVELOPE keyword will not be implemented on the Agon platform. Agon's VDP has a rich audio API with different envelope options per channel, that can be easily accessed/set through the VDU keyword. Please see the [AgonPlatform VDP Enhanced audio API](https://agonplatform.github.io/agon-docs/vdp/Enhanced-Audio-API/?h=audio+api)
 
 ## INKEY behavior
-INKEY behaves as documented, except when given a negative value as 'wait' time. The negative value represents the keyvalue to immediately check for. TRUE is returned when the given key is pressed, or 0 if not pressed.
+Syntax: ````<n-var>=INKEY(<numeric>)````
+INKEY behaves as documented for 0 or positive <em>numeric</em> clock ticks, as a wait time limit.
+The function does a GET, waiting for a maximum of 'num' clock ticks of 10ms each. If no key is pressed in the time limit, INKEY will return -1. The INKEY function will return the ASCII value of the key pressed.
+
+A negative parameter can be specified as a [RISCOS-compatible keyvalue](https://www.riscos.com/support/developers/bbcbasic/appendices/inkeyvalues.html) to immediately check for. INKEY returns with -1 when the given key is pressed, or 0 if not pressed.
+
 
 ## TINT behavior
 Syntax: ````<n-var>=TINT(X,Y)````
