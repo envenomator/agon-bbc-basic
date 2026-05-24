@@ -5,6 +5,7 @@ BASE_URL="https://codeberg.org/envenomator/eZ80-for-rc-basic/raw/branch/agon/src
 DEST_DIR="./include/bbc-ez80"
 
 FILES=(
+  ASMB.Z80
   DATA.Z80
   EVAL.Z80
   EXEC.Z80
