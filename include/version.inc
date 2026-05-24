@@ -3,6 +3,6 @@
 .endm
 
 .macro RELEASE_AS_STRING
-        DEFM    "v0.6"
+        DEFM    "v0.7"
 .endm
 
