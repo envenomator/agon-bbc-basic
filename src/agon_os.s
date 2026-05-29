@@ -277,7 +277,7 @@ LTRAP1:
 OSOPEN:
     LD          C, fa_read
     JR          Z, 1f
-    LD          C, fa_write | fa_open_append
+    LD          C, fa_read | fa_write | fa_open_existing
     JR          C, 1f
     LD          C, fa_write | fa_create_always
 1:
