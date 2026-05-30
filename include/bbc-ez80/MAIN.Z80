@@ -18,6 +18,8 @@
 	EXTRN	CHAIN0
 	EXTRN	TERMQ
 	EXTRN	MUL16
+	EXTRN	MUL24
+	EXTRN	MUL24_FAST
 	EXTRN	X14OR5
 	EXTRN	SPACES
 	EXTRN	ESCAPE
@@ -1720,19 +1722,24 @@ GETVAR:	LD	A,(IY)
 GETV3:	PUSH	HL
 	PUSH	DE
 	CALL	EXPRI		;SUBSCRIPT
-	EXX
+	LD	A,H		; subscript must fit in unsigned 24 bits
+	OR	A
+	LD	A,15
+	JR	NZ,ERROR3	;"Subscript"
+	CONVERT_U32_TO_U24	; HL = unsigned 24-bit subscript
 	POP	DE
 	EX	(SP),HL
-	LD	BC, 0
-	LD	C,(HL)
+	LD	BC,(HL)		;BC = 24-bit size of this dimension
 	INC	HL
-	LD	B,(HL)
+	INC	HL
 	INC	HL
 	EX	(SP),HL
 	EX	DE,HL
+	PUSH	BC		;MUL24 destroys BC, but bounds check needs it
 	PUSH	DE
-	CALL	MUL16		;HL=HL*BC
+	CALL	MUL24_FAST	;HL=HL*BC
 	POP	DE
+	POP	BC
 	ADD	HL,DE
 	EX	DE,HL
 	OR	A

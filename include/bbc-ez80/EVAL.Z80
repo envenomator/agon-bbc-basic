@@ -56,6 +56,7 @@
 	GLOBAL	LETARR
 ;
 	EXTRN	MUL16
+	EXTRN	MUL24
 	EXTRN	ERROR
 	EXTRN	SYNTAX
 	EXTRN	CHANEL
@@ -669,15 +670,14 @@ ARRLEN:	LD	A,(HL)		;Number of dimensions
 	OR	A
 	JR	Z,ARRAY
 	LD	DE,1
-ARLOOP:	LD	BC, 0
-	LD	C,(HL)
+ARLOOP:	LD	BC,(HL)		;BC = 24-bit size of this dimension
 	INC	HL
-	LD	B,(HL)		;BC = size of this dimension
+	INC	HL
 	INC	HL
 	EX	DE,HL
 	PUSH	AF
 	PUSH	DE
-	CALL	MUL16		;HL=HL*BC
+	CALL	MUL24		;HL=HL*BC
 	POP	DE
 	POP	AF
 	EX	DE,HL
@@ -845,14 +845,17 @@ DIMF1:	POP	HL
 	JR	C,BADSUB
 	DEC	E
 	JP	M,DIMF3
-	ADD	HL,DE
-	ADD	HL,DE
-	LD	A,(HL)
+	LD	A,E		;Dimension index is now zero-based
+	OR	A
+	JR	Z,DIMF2
+DIMF1A:	INC	HL		;Each stored dimension is now 24-bit
 	INC	HL
-	LD	H,(HL)
-	LD	L,A
-	DEC	HL
-DIMF2:	JP	COUNT1
+	INC	HL
+	DEC	E
+	JR	NZ,DIMF1A
+DIMF2:	LD	HL,(HL)		;HL = 24-bit stored dimension size
+	DEC	HL		;Stored size is upper-bound + 1
+	JP	UINT24_TO_UINT32
 
 DIMF3:	LD	L,A
 	LD	H,0

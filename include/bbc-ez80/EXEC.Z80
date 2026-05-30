@@ -20,6 +20,8 @@
 	GLOBAL	CHAIN0
 	GLOBAL	CHECK
 	GLOBAL	MUL16
+	GLOBAL	MUL24
+	GLOBAL	MUL24_FAST
 	GLOBAL	X14OR5
 	GLOBAL	TERMQ
 	GLOBAL	STOREN
@@ -586,17 +588,27 @@ DIM1:	INC	IY
 	PUSH	DE
 	PUSH	IX
 	CALL	EXPRI		;DIMENSION SIZE
-	BIT	7,H
+	LD	A,H		; must fit in unsigned 24 bits
+	OR	A
 	JP	NZ,BADDIM
-	EXX
-	INC	HL
+	CONVERT_U32_TO_U24	; HL = unsigned 24-bit dimension
+	INC	HL		; BASIC dimensions are inclusive
+	LD	(conversion_store),HL
+	LD	A,(conversion_store+0)
+	LD	C,A
+	LD	A,(conversion_store+1)
+	OR	C
+	LD	C,A
+	LD	A,(conversion_store+2)
+	OR	C
+	JP	Z,NOROOM	; 0FFFFFFH + 1 overflowed 24 bits
 	POP	IX
 	INC	IX
-	LD	(IX),L		;SAVE SIZE
+	LD	(IX+0),HL	;SAVE 24-bit SIZE
 	INC	IX
-	LD	(IX),H
+	INC	IX
 	POP	BC
-	CALL	MUL16		;HL=HL*BC
+	CALL	MUL24		;HL=HL*BC
 	JP	C,NOROOM	;TOO LARGE
 	EX	DE,HL		;DE=PRODUCT
 	POP	BC
@@ -3507,6 +3519,7 @@ MUL16_OVF:
 	SCF
 	RET
 
+
 ;
 CHANEL:	CALL	NXT
 	CP	'#'
@@ -3619,5 +3632,81 @@ STKANY:	UEXT	HL
 	OR	A		; clear carry
 	SBC	HL, DE		; caller_SP - SPL
 	RET
+
+;
+; MUL24_FAST - 24-bit unsigned multiply with fast 16-bit path
+;   Inputs: HL = number to be multiplied
+;           BC = multiplier
+;  Outputs: HL = HL * BC
+;           Carry set if overflow beyond 24 bits
+; Destroys: A,D,E,H,L,F and R0 on the fast path;
+;           same as MUL24, including B,C, on the fallback path.
+;
+; This wrapper does not try to read the hidden ADL upper byte directly.
+; Instead it stores the 24-bit registers to R0 and tests byte +2,
+; which is the same valid pattern already used elsewhere in this tree.
+;
+; If either operand is genuinely wider than 16 bits, go straight to MUL24.
+; If both fit in 16 bits, try MUL16 first.  If MUL16 overflows, reload
+; the original HL from R0 and redo the multiply with MUL24, because a
+; 16x16 product may still be valid in 24 bits.
+;
+MUL24_FAST:
+	LD	(R0),HL
+	LD	A,(R0+2)
+	OR	A
+	JP	NZ,MUL24
+	LD	(R0),BC
+	LD	A,(R0+2)
+	OR	A
+	JP	NZ,MUL24
+	LD	(R0),HL		; save original HL in case MUL16 overflows
+	CALL	MUL16
+	RET	NC
+	LD	HL,(R0)
+	JP	MUL24
+;
+; MUL24 - 24-bit unsigned multiply
+;   Inputs: HL = number to be multiplied
+;           BC = multiplier
+;  Outputs: HL = HL * BC
+;           Carry set if overflow beyond 24 bits
+; Destroys: A,B,C,D,E,H,L,F and R0
+;
+; This is intentionally small and simple rather than clever: array
+; dimensions are normally small, but this keeps the descriptor/index
+; arithmetic correct for the full ADL address range.
+;
+MUL24:	LD	(R0),BC		; multiplier, 24-bit
+	LD	DE,0
+	EX	DE,HL		; DE = multiplicand, HL = result
+MUL24_LOOP:
+	LD	A,(R0+0)
+	BIT	0,A
+	JR	Z,MUL24_NOADD
+	ADD	HL,DE
+	RET	C
+MUL24_NOADD:
+	LD	A,(R0+2)	; multiplier >>= 1
+	SRL	A
+	LD	(R0+2),A
+	LD	A,(R0+1)
+	RR	A
+	LD	(R0+1),A
+	LD	A,(R0+0)
+	RR	A
+	LD	(R0+0),A
+	LD	C,A		; stop when shifted multiplier is zero
+	LD	A,(R0+1)
+	OR	C
+	LD	C,A
+	LD	A,(R0+2)
+	OR	C
+	RET	Z		; carry is clear here
+	EX	DE,HL		; multiplicand <<= 1
+	ADD	HL,HL
+	EX	DE,HL
+	RET	C		; future non-zero multiplier would exceed 24 bits
+	JR	MUL24_LOOP
 
 	END

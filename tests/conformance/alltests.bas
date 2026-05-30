@@ -125,6 +125,8 @@
  1310 PROCL1_test_data
  1320 PROCsection("ARRAYS")
  1330 PROCL1_test_arrays
+ 1331 PROCsection("LARGE ARRAYS")
+ 1332 PROCL1_test_large_arrays
  1340 PROCsection("MEMORY / INDIRECTION")
  1350 PROCL1_test_memory
  1360 PROCsection("ERROR HANDLING")
@@ -302,9 +304,30 @@
  3080 vS%=vBase%+20
  3090 $vS%="ABCDEF"
  3100 PROCcheck_s("$ read back",$vS%,"ABCDEF")
- 3110 ENDPROC
- 3120 DEF PROCL1_test_errors
- 3130 LOCAL vErr%
+ 3101 ENDPROC
+
+ 3102 DEF PROCL1_test_large_arrays
+ 3103 DIM lBig%(70000)
+ 3104 lBig%(0)=11
+ 3105 lBig%(65536)=22
+ 3106 lBig%(70000)=33
+
+ 3107 PROCcheck_i("large array upper bound",DIM(lBig%(),1),70000)
+ 3108 PROCcheck_i("large array element 0",lBig%(0),11)
+ 3109 PROCcheck_i("large array element 65536",lBig%(65536),22)
+ 3110 PROCcheck_i("large array element 70000",lBig%(70000),33)
+
+ 3111 DIM lBig2%(129,129)
+ 3112 lBig2%(0,0)=5678
+ 3113 lBig2%(129,129)=1234
+ 3114 PROCcheck_i("large array 2d origin",lBig2%(0,0),5678)
+ 3115 PROCcheck_i("large array 2d value",lBig2%(129,129),1234)
+ 3116 PROCcheck_i("large array 2d dim1",DIM(lBig2%(),1),129)
+ 3117 PROCcheck_i("large array 2d dim2",DIM(lBig2%(),2),129)
+ 3118 ENDPROC
+
+ 3138 DEF PROCL1_test_errors
+ 3139 LOCAL vErr%
  3140 PROCL1_divzero(vErr%)
  3150 PROCcheck_i("ON ERROR LOCAL catches div/0",vErr%,18)
  3160 ENDPROC

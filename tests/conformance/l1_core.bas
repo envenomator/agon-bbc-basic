@@ -25,6 +25,8 @@
   220 PROCtest_memory
   230 PROCsection("ERROR HANDLING")
   240 PROCtest_errors
+  245 PROCsection("LARGE ARRAYS")
+  246 PROCtest_large_arrays
   250 PRINT
   260 PRINT "--------------------------------"
   270 PRINT "TOTAL TESTS : ";vTest%
@@ -318,3 +320,22 @@
 10813 PROCcheck_i("VAL zero",VAL("0"),0)
 
 10814 ENDPROC
+10900 DEF PROCtest_large_arrays
+10910 DIM lBig%(70000)
+10920 lBig%(0)=11
+10930 lBig%(65536)=22
+10940 lBig%(70000)=33
+
+10950 PROCcheck_i("large array upper bound",DIM(lBig%(),1),70000)
+10960 PROCcheck_i("large array element 0",lBig%(0),11)
+10970 PROCcheck_i("large array element 65536",lBig%(65536),22)
+10980 PROCcheck_i("large array element 70000",lBig%(70000),33)
+
+10990 DIM lBig2%(129,129)
+11000 lBig2%(0,0)=5678
+11010 lBig2%(129,129)=1234
+11020 PROCcheck_i("large array 2d origin",lBig2%(0,0),5678)
+11030 PROCcheck_i("large array 2d value",lBig2%(129,129),1234)
+11040 PROCcheck_i("large array 2d dim1",DIM(lBig2%(),1),129)
+11050 PROCcheck_i("large array 2d dim2",DIM(lBig2%(),2),129)
+11060 ENDPROC
