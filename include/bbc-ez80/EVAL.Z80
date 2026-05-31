@@ -857,9 +857,9 @@ DIMF2:	LD	HL,(HL)		;HL = 24-bit stored dimension size
 	DEC	HL		;Stored size is upper-bound + 1
 	JP	UINT24_TO_UINT32
 
-DIMF3:	LD	L,A
+DIMF3:	LD	L,A		;Return number of dimensions
 	LD	H,0
-	JR	DIMF2
+	JP	COUNT1
 ;
 BADSUB:	LD	A,15
 	JP	ERROR			;"Bad subscript"
@@ -2436,15 +2436,34 @@ ARRDOT:	INC	IY		;Bump past dot
 ;
 	LD	HL,1
 	JR	Z,ARR1D
-	LD	H,(IY-1)
-	LD	L,(IY-2)
+
+	PUSH	AF
+	LD	A,(IY-1)	;High byte of 24-bit dimension
+	OR	A
+	JR	Z,ARRD1
+	POP	AF
+	LD	A,20		;Number too big
+	JP	ERROR
+ARRD1:	POP	AF
+	LD	H,(IY-2)	;Mid byte
+	LD	L,(IY-3)	;Low byte
+
 ARR1D:	PUSH	DE
 	EX	DE,HL
 	CALL	X14OR5
 	EX	DE,HL
 	POP	DE
-	LD	B,(IX-1)
-	LD	C,(IX-2)
+
+	PUSH	AF
+	LD	A,(IX-1)	;High byte of 24-bit dimension
+	OR	A
+	JR	Z,ARRD2
+	POP	AF
+	LD	A,20		;Number too big
+	JP	ERROR
+ARRD2:	POP	AF
+	LD	B,(IX-2)	;Mid byte
+	LD	C,(IX-3)	;Low byte
 ;
 ; A = type, Z-flag set if first array is one-dimensional
 ; BC = no. of rows of first source array (inner loop counter)
