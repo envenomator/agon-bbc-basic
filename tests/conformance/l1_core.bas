@@ -237,6 +237,9 @@
 
  7210 REM. Check array multiplication (dot-product):
  7220 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
+ 7225 PROCcheck_i("2D array dimensions",DIM(cM()),2)
+ 7226 PROCcheck_i("2D array size 1",DIM(cM(),1),2)
+ 7227 PROCcheck_i("2D array size 2",DIM(cM(),2),3)
  7230 DIM aM%(2,1),bM%(1,3),cM%(2,3) : aM%()=1,2,3,4,5,6 : bM%()=8,7,6,5,4,3,2,1 : cM%() = aM%() . bM%()
  7240 DIM aM&(2,1),bM&(1,3),cM&(2,3) : aM&()=1,2,3,4,5,6 : bM&()=8,7,6,5,4,3,2,1 : cM&() = aM&() . bM&()
  7250 cM()   -= 16,13,10,7,40,33,26,19,64,53,42,31
