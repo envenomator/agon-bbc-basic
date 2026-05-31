@@ -214,6 +214,8 @@
  7000 DEF PROCtest_arrays
  7010 DIM aI%(2)
  7020 aI%()=1,2,3
+ 7025 PROCcheck_i("array dimensions",DIM(aI%()),1)
+ 7026 PROCcheck_i("array size",DIM(aI%(),1),2)
  7030 PROCcheck_i("array element 0",aI%(0),1)
  7040 PROCcheck_i("array element 2",aI%(2),3)
  7050 PROCcheck_i("SUM integer array",SUM(aI%()),6)
@@ -232,7 +234,28 @@
  7180 aS$()="AG","ON","!"
  7190 PROCcheck_s("SUM string array",SUM(aS$()),"AGON!")
  7200 PROCcheck_i("SUMLEN string array",SUMLEN(aS$()),5)
- 7210 ENDPROC
+
+ 7210 REM. Check array multiplication (dot-product):
+ 7220 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
+ 7230 DIM aM%(2,1),bM%(1,3),cM%(2,3) : aM%()=1,2,3,4,5,6 : bM%()=8,7,6,5,4,3,2,1 : cM%() = aM%() . bM%()
+ 7240 DIM aM&(2,1),bM&(1,3),cM&(2,3) : aM&()=1,2,3,4,5,6 : bM&()=8,7,6,5,4,3,2,1 : cM&() = aM&() . bM&()
+ 7250 cM()   -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 7260 cM%()  -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 7270 cM&()  -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 7271 PROCcheck_i("Array multiplication SUM zero type 1", SUM(cM()),0)
+ 7272 PROCcheck_i("Array multiplication MOD zero type 1", MOD(cM()),0)
+ 7273 PROCcheck_i("Array multiplication SUM zero type 2", SUM(cM%()),0)
+ 7274 PROCcheck_i("Array multiplication MOD zero type 2", MOD(cM%()),0)
+ 7275 PROCcheck_i("Array multiplication SUM zero type 3", SUM(cM&()),0)
+ 7276 PROCcheck_i("Array multiplication MOD zero type 3", MOD(cM&()),0)
+ 7280 REM. Check vector multiplication (dot-product):
+ 7290 DIM avM(5),bvM(5),cvM(0):avM()=1.0,2.0,3.0,4.0,5.0,6.0:bvM()=8,7,6,5,4,3:  cvM() = avM() . bvM()
+ 7300 DIM avM%(5), bvM%(5), cvM%(0) : avM%()=1,2,3,4,5,6 : bvM%()=8,7,6,5,4,3 : cvM%() = avM%().bvM%()
+ 7310 DIM avM&(5), bvM&(5), cvM&(0) : avM&()=1,2,3,4,5,6 : bvM&()=8,7,6,5,4,3 : cvM&() = avM&().bvM&()
+ 7311 PROCcheck_i("Array vector multiplication type 1", cvM(0),98)
+ 7312 PROCcheck_i("Array vector multiplication type 2", cvM%(0), 98)
+ 7313 PROCcheck_i("Array vector multiplication type 3", cvM&(0), 98)
+ 7320 ENDPROC
 
  8000 DEF PROCtest_memory
  8010 LOCAL vBase%,vP%,vR%,vS%

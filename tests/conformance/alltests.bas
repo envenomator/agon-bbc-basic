@@ -264,6 +264,8 @@
  2680 DEF PROCL1_test_arrays
  2690 DIM aI%(2)
  2700 aI%()=1,2,3
+ 2705 PROCcheck_i("array dimensions",DIM(aI%()),1)
+ 2706 PROCcheck_i("array size",DIM(aI%(),1),2)
  2710 PROCcheck_i("array element 0",aI%(0),1)
  2720 PROCcheck_i("array element 2",aI%(2),3)
  2730 PROCcheck_i("SUM integer array",SUM(aI%()),6)
@@ -280,9 +282,28 @@
  2840 PROCcheck_r("array MOD function",MOD(aR()),13,1E-7)
  2850 DIM aS$(2)
  2860 aS$()="AG","ON","!"
- 2870 PROCcheck_s("SUM string array",SUM(aS$()),"AGON!")
- 2880 PROCcheck_i("SUMLEN string array",SUMLEN(aS$()),5)
+ 2861 PROCcheck_s("SUM string array",SUM(aS$()),"AGON!")
+ 2862 PROCcheck_i("SUMLEN string array",SUMLEN(aS$()),5)
+ 2863 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
+ 2864 DIM aM%(2,1),bM%(1,3),cM%(2,3) : aM%()=1,2,3,4,5,6 : bM%()=8,7,6,5,4,3,2,1 : cM%() = aM%() . bM%()
+ 2865 DIM aM&(2,1),bM&(1,3),cM&(2,3) : aM&()=1,2,3,4,5,6 : bM&()=8,7,6,5,4,3,2,1 : cM&() = aM&() . bM&()
+ 2866 cM()   -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 2867 cM%()  -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 2868 cM&()  -= 16,13,10,7,40,33,26,19,64,53,42,31
+ 2869 PROCcheck_i("Array multiplication SUM zero type 1", SUM(cM()),0)
+ 2870 PROCcheck_i("Array multiplication MOD zero type 1", MOD(cM()),0)
+ 2871 PROCcheck_i("Array multiplication SUM zero type 2", SUM(cM%()),0)
+ 2872 PROCcheck_i("Array multiplication MOD zero type 2", MOD(cM%()),0)
+ 2873 PROCcheck_i("Array multiplication SUM zero type 3", SUM(cM&()),0)
+ 2874 PROCcheck_i("Array multiplication MOD zero type 3", MOD(cM&()),0)
+ 2875 DIM avM(5),bvM(5),cvM(0):avM()=1.0,2.0,3.0,4.0,5.0,6.0:bvM()=8,7,6,5,4,3:  cvM() = avM() . bvM()
+ 2876 DIM avM%(5), bvM%(5), cvM%(0) : avM%()=1,2,3,4,5,6 : bvM%()=8,7,6,5,4,3 : cvM%() = avM%().bvM%()
+ 2877 DIM avM&(5), bvM&(5), cvM&(0) : avM&()=1,2,3,4,5,6 : bvM&()=8,7,6,5,4,3 : cvM&() = avM&().bvM&()
+ 2878 PROCcheck_i("Array vector multiplication type 1", cvM(0),98)
+ 2879 PROCcheck_i("Array vector multiplication type 2", cvM%(0), 98)
+ 2880 PROCcheck_i("Array vector multiplication type 3", cvM&(0), 98)
  2890 ENDPROC
+
  2900 DEF PROCL1_test_memory
  2910 LOCAL vBase%,vP%,vR%,vS%
  2920 DIM mBlk% 31
@@ -2395,7 +2416,7 @@
 24380 WHILE NOT EOF#vCh%
 24390 INPUT#vCh%,sLevel$,vT%,vP%,vF%
 24400 IF sLevel$<>"INIT" THEN vTT%=vTT%+vT% : vTP%=vTP%+vP% : vTF%=vTF%+vF%
-24410 IF sLevel$<>"INIT" THEN PRINT sLevel$;"  TESTS=";vT%;"  PASS=";vP%;"  FAIL=";vF%
+24410 IF sLevel$<>"INIT" THEN PRINT sLevel$;TAB(12);"TESTS=";vT%;TAB(24);"PASS=";vP%;TAB(36);"FAIL=";vF%
 24420 ENDWHILE
 24430 CLOSE#vCh%
 24440 PRINT "--------------------"
