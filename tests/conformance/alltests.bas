@@ -280,18 +280,19 @@
  2820 DIM aR(2)
  2830 aR()=3,4,12
  2840 PROCcheck_r("array MOD function",MOD(aR()),13,1E-7)
- 2850 DIM aS$(2):DIM bS$(2)
- 2851 aS$()="AG","ON","!"
- 2852 bS$() = aS$()
+ 2850 DIM aS$(2):DIM bS$(2):DIM aS1$(4):DIM bS1$(4)
+ 2851 aS$()="AG","ON","!": aS1$() = "Zero", "one", "two", "three", "four"
+ 2852 bS$() = aS$():bS1$() = aS1$()
  2853 PROCcheck_s("SUM string array",SUM(aS$()),"AGON!")
  2854 PROCcheck_i("SUMLEN string array",SUMLEN(aS$()),5)
  2855 PROCcheck_s("String array assignment 1", bS$(0),"AG")
  2856 PROCcheck_s("String array assignment 2", bS$(1), "ON")
  2857 PROCcheck_s("String array assignment 3", bS$(2), "!")
- 2858 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
- 2859 PROCcheck_i("2D array dimensions",DIM(cM()),2)
- 2860 PROCcheck_i("2D array size 1",DIM(cM(),1),2)
- 2861 PROCcheck_i("2D array size 2",DIM(cM(),2),3)
+ 2858 PROCcheck_s("String array assignment 4", SUM(aS1$()), SUM(bS1$()))
+ 2859 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
+ 2860 PROCcheck_i("2D array dimensions",DIM(cM()),2)
+ 2861 PROCcheck_i("2D array size 1",DIM(cM(),1),2)
+ 2862 PROCcheck_i("2D array size 2",DIM(cM(),2),3)
  2864 DIM aM%(2,1),bM%(1,3),cM%(2,3) : aM%()=1,2,3,4,5,6 : bM%()=8,7,6,5,4,3,2,1 : cM%() = aM%() . bM%()
  2865 DIM aM&(2,1),bM&(1,3),cM&(2,3) : aM&()=1,2,3,4,5,6 : bM&()=8,7,6,5,4,3,2,1 : cM&() = aM&() . bM&()
  2866 cM()   -= 16,13,10,7,40,33,26,19,64,53,42,31

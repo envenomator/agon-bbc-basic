@@ -230,15 +230,15 @@
  7140 DIM aR(2)
  7150 aR()=3,4,12
  7160 PROCcheck_r("array MOD function",MOD(aR()),13,1E-7)
- 7170 DIM aS$(2):DIM bS$(2)
- 7180 aS$()="AG","ON","!"
- 7185 bS$() = aS$()
+ 7170 DIM aS$(2):DIM bS$(2):DIM aS1$(4):DIM bS1$(4)
+ 7180 aS$()="AG","ON","!":aS1$() = "Zero", "one", "two", "three", "four"
+ 7185 bS$() = aS$(): bS1$() = aS1$()
  7190 PROCcheck_s("SUM string array",SUM(aS$()),"AGON!")
  7200 PROCcheck_i("SUMLEN string array",SUMLEN(aS$()),5)
  7201 PROCcheck_s("String array assignment 1", bS$(0),"AG")
  7202 PROCcheck_s("String array assignment 2", bS$(1), "ON")
  7203 PROCcheck_s("String array assignment 3", bS$(2), "!")
-
+ 7204 PROCcheck_s("String array assignment 4", SUM(aS1$()), SUM(bS1$()))
  7210 REM. Check array multiplication (dot-product):
  7220 DIM aM(2,1),bM(1,3),cM(2,3) : aM()=1,2,3,4,5,6 : bM()=8,7,6,5,4,3,2,1 : cM() = aM().bM()
  7225 PROCcheck_i("2D array dimensions",DIM(cM()),2)
