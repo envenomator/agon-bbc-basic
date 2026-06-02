@@ -2325,6 +2325,7 @@ ITEMA3:	EX	DE,HL		;DE = destination
 	LD	L,C
 	ADD	HL,HL
 	ADD	HL,HL
+	ADD	HL,BC
 	LD	B,H
 	LD	C,L
 	LOG ITEMA3_2
