@@ -2141,8 +2141,7 @@ LETARR:	RES	6,D		;Lose array marker
 LETA0:	LD	(HL),0
 	INC	HL
 	DEC	BC
-	LD	A,B
-	OR	C
+	TST_BC_IS_ZERO
 	JR	NZ,LETA0	; Clear allocated stack
 
 	POP	HL		; Restore HL (heap address)
@@ -2189,8 +2188,7 @@ EXPRA2:	PUSH	BC
 	ADD	IX,BC
 	POP	BC
 	DEC	BC
-	LD	A,B
-	OR	C
+	TST_BC_IS_ZERO
 	JR	NZ,EXPRA2
 	RET
 ;
@@ -2203,8 +2201,7 @@ EXPRA4:	INC	IY		;Bump past comma
 	ADD	IX,BC
 	POP	BC
 	DEC	BC
-	LD	A,B
-	OR	C
+	TST_BC_IS_ZERO
 	RET	Z
 	PUSH	BC
 	PUSH	DE
@@ -2239,8 +2236,7 @@ EXPRA7:	CALL	NXT
 	POP	DE
 EXPRA8:	ADD	HL,BC		;Skip remaining elements
 	DEC	DE
-	LD	A,D
-	OR	E
+	TST_DE_IS_ZERO
 	JR	NZ,EXPRA8
 	RET
 ;
@@ -2313,24 +2309,26 @@ ITEMA2:	PUSH	BC
 	ADD	HL,BC
 	POP	BC
 	DEC	BC
-	LD	A,B
-	OR	C
+	TST_BC_IS_ZERO
 	JR	NZ,ITEMA2
 	RET
 ;
 ; Process string array item (just copy descriptors):
+;   Inputs: BC = number of elements
+;           HL = pointer to destination on stack
+; Destroys: HL, DE, BC
 ;
-ITEMA3:	EX	DE,HL		;DE = destination
-	LD	H,B
-	LD	L,C
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,BC
-	LD	B,H
-	LD	C,L
-	LOG ITEMA3_2
-	PUSH	IX
-	POP	HL		;HL = source
+;
+ITEMA3:	EX	DE, HL		; DE = destination
+	PUSH	BC
+	POP	HL		; LD HL, BC
+	ADD	HL, HL		; HL *= 5
+	ADD	HL, HL		;
+	ADD	HL, BC		;
+	PUSH	HL		; LD BC, HL
+	POP	BC
+	PUSH	IX		; LD HL, IX
+	POP	HL		; HL = source
 	LDIR
 	RET
 ;
@@ -2392,8 +2390,7 @@ ITEMA0:	POP	BC
 ITEMA6:	CALL	STORE4STR
 	ADD	IX,DE
 	DEC	BC
-	LD	A,B
-	OR	C
+	TST_BC_IS_ZERO
 	JR	NZ,ITEMA6	;Copy into every element!
 	RET
 ;
