@@ -535,16 +535,17 @@ LNZERO:
     PUSH        HL
     INC         H
     XOR         A
-    SBC         HL,SP
+    LD          BC, (HIMEM)
+    SBC         HL,BC
     POP         HL
-    JP          NC,ERROR                                ; "No room"
+    JR          NC, NEW_ERROR                           ; "No room", but not leave user hanging, automatically do NEW
     EX          (SP),HL
     PUSH        HL
     INC         HL
     OR          A
     SBC         HL,DE
-    LD          B,H                                     ; BC=AMOUNT TO MOVE
-    LD          C,L
+    PUSH        HL                                      ; BC=AMOUNT TO MOVE
+    POP         BC
     POP         HL
     POP         DE
     JR          Z,ATEND
@@ -567,6 +568,10 @@ ATEND:
     LDIR                                                ; ADD LINE
     SCF
     RET
+
+NEW_ERROR:
+    CALL        NEWIT
+    JP          ERROR
 ;
 ; Load the file in as a tokenised binary blob
 ;

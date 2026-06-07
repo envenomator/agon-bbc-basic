@@ -1,0 +1,14 @@
+   10 REM GENERATE HUGE PROGRAM
+   20 F%=OPENOUT("huge.bas")
+   30 IF F%=0 THEN PRINT "OPEN FAILED":END
+
+   40 FOR L%=10 TO 20000 STEP 10
+   50 S$=STR$(L%)+" A%=1:A%=2:A%=3:A%=4:A%=5:A%=6:A%=7:A%=8:A%=9:A%=10:"
+   60 S$=S$+"A%=11:A%=12:A%=13:A%=14:A%=15:A%=16:A%=17:A%=18:A%=19:A%=20"
+   70 BPUT#F%,S$
+   80 BPUT#F%,CHR$(13)
+   90 NEXT
+
+  100 CLOSE#F%
+  110 PRINT "DONE"
+
