@@ -2948,7 +2948,7 @@ RESAR1:	LD	SP,HL
 	JR	RESLO1
 ;
 ; RESLOC - Restore local variables/arrays or DATA/ERROR status from stack
-;   Inputs: A = 0 if everything OK, bit0 set if DATPTR, bit1 set if ERRTRP
+;   Inputs: A = 0 if everything OK, bit0 set if DATPTR, bit1 set if ERRTRP/ONERSP
 ;  Outputs: Z if nothing was restored, NZ if something was restored
 ; Destroys: A,B,C,D,E,H,L,H',L',IX,SP,flags
 ;
@@ -3002,6 +3002,10 @@ RESLO6:	OR	A
 	LD	HL,ERRTRP	;test for ERRPTR
 	SBC	HL,BC
 	JR	Z,RESLO3
+        OR      A
+        LD      HL,ONERSP       ;test for saved ON ERROR LOCAL stack pointer
+        SBC     HL,BC
+        JR      Z,RESLO3
 RESLO7:	PUSH	BC		;Put back pointer
 	LD	BC,LOCCHK
 	JR	RESLO0
