@@ -1333,9 +1333,9 @@ DEL:	PUSH	DE
 ; Destroys: A,B,C,H,L,F
 ;
 LOAD0:	LD	DE,(PAGE)
-	LD	HL,-256
-	ADD	HL,SP
-	SBC	HL,DE		;FIND AVAILABLE SPACE
+	LD	HL,(HIMEM)
+	OR	A
+	SBC	HL,DE		; Available BASIC program space
 	PUSH	HL
 	POP	BC		; BC = full 24-bit length
 	LD	HL,ACCS
