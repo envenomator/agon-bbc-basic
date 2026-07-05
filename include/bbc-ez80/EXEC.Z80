@@ -569,10 +569,8 @@ DIM:	PUSH	IY
 	JP	NZ,DIM4
 	PUSH	HL
 	POP	IX
-	LD	A,(HL)
-	AND	0FEH
-	INC	HL
-	OR	(HL)
+	LD	HL,(HL)
+	TST_HL_ARRAY_PTR_IS_NULL
 	JP	NZ,DIM4
 	POP	BC		;LEVEL STACK
 	LD	A,D
@@ -3002,10 +3000,10 @@ RESLO6:	OR	A
 	LD	HL,ERRTRP	;test for ERRPTR
 	SBC	HL,BC
 	JR	Z,RESLO3
-        OR      A
-        LD      HL,ONERSP       ;test for saved ON ERROR LOCAL stack pointer
-        SBC     HL,BC
-        JR      Z,RESLO3
+	OR	A
+	LD	HL,ONERSP	;test for saved ON ERROR LOCAL stack pointer
+	SBC	HL,BC
+	JR	Z,RESLO3
 RESLO7:	PUSH	BC		;Put back pointer
 	LD	BC,LOCCHK
 	JR	RESLO0

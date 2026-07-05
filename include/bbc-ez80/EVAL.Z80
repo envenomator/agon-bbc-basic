@@ -694,9 +694,7 @@ GETARR:	CALL	NXT
 	AND	8FH
 	LD	B,A		;Type + size
 GETAR1:	LD	HL,(HL)
-	LD	A,L
-	AND	0FEH
-	OR	H
+	TST_HL_ARRAY_PTR_IS_NULL
 	JR	Z,ARRAY           ;Bad use of array
 	RET
 ;

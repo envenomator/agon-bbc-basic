@@ -67,6 +67,18 @@
 	POP	DE
 .endm
 
+.macro	TST_HL_ARRAY_PTR_IS_NULL
+	PUSH	HL
+	RES	0,L		; Ignore the array descriptor flag bit
+	PUSH	DE
+	LD	DE,0
+	OR	A
+	SBC	HL,DE
+	ADD	HL,DE
+	POP	DE
+	POP	HL
+.endm
+
 .macro	TST_DE_IS_ZERO
 	PUSH	HL
 	XOR	A
